@@ -1,0 +1,25 @@
+pragma cashscript ^0.13.0;
+
+contract PropertySaleEscrow(pubkey buyer, pubkey seller, pubkey arbiter) {
+    // Path 1: Seller and arbiter approve the sale, so title transfer can complete.
+    function completeSale(sig sellerSig, sig arbiterSig) {
+        console.log("completeSale: checking sellerSig against seller pubkey:", seller);
+        console.log("completeSale: checking arbiterSig against arbiter pubkey:", arbiter);
+        require(checkSig(sellerSig, seller), "Seller signature invalid");
+        require(checkSig(arbiterSig, arbiter), "Arbiter signature invalid");
+    }
+    // Path 2: Buyer and arbiter approve cancellation, so funds return to the buyer.
+    function cancelSale(sig buyerSig, sig arbiterSig) {
+        console.log("cancelSale: checking buyerSig against buyer pubkey:", buyer);
+        console.log("cancelSale: checking arbiterSig against arbiter pubkey:", arbiter);
+        require(checkSig(buyerSig, buyer), "Buyer signature invalid");
+        require(checkSig(arbiterSig, arbiter), "Arbiter signature invalid");
+    }
+    // Path 3: Buyer and seller agree directly, so escrow can close mutually.
+    function mutualClose(sig buyerSig, sig sellerSig) {
+        console.log("mutualClose: checking buyerSig against buyer pubkey:", buyer);
+        console.log("mutualClose: checking sellerSig against seller pubkey:", seller);
+        require(checkSig(buyerSig, buyer), "Buyer signature invalid");
+        require(checkSig(sellerSig, seller), "Seller signature invalid");
+    }
+}
