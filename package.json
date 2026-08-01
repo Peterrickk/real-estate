@@ -12,14 +12,6 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "compile:contract": "cashc contracts/PropertySaleEscrow.cash -o artifacts/PropertySaleEscrow.json",
-<<<<<<< HEAD
-    "demo:PropertySaleEscrow": "node demos/PropertySaleEscrow.ts",
-    "test:escrow": "vite build --ssr demos/escrow-service-test.ts --outDir .ssr-test && node .ssr-test/escrow-service-test.js"
-  },
-  "dependencies": {
-    "cashscript": "^0.13.2",
-    "leaflet": "^1.9.4",
-=======
     "compile:nft-contract": "cashc contracts/PropertyNFT.cash -o artifacts/PropertyNFT.json",
     "demo:PropertySaleEscrow": "node demos/PropertySaleEscrow.ts",
     "demo:PropertyNFT": "ts-node demos/simple-nft-demo.ts",
@@ -30,7 +22,6 @@
     "cashscript": "^0.13.2",
     "leaflet": "^1.9.4",
     "mainnet-js": "^3.0.0",
->>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-leaflet": "^5.0.0",
