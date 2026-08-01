@@ -18,10 +18,11 @@ function truncatePubkey(pubkey: string): string {
 
 export function TransferRecordRow({ record }: TransferRecordProps) {
   return (
-    <article className="transfer-row">
+    <article className={`transfer-row${record.source === 'escrow' ? ' transfer-row-escrow' : ''}`}>
       <div className="transfer-owner">
         <span className="label">Owner</span>
         <code>{truncatePubkey(record.owner)}</code>
+        {record.source === 'escrow' && <span className="badge badge-info badge-sm">Escrow</span>}
       </div>
       <div>
         <span className="label">Acquired</span>

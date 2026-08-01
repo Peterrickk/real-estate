@@ -1,4 +1,6 @@
 import { NavLink } from 'react-router-dom';
+import { useAppData } from '../context/AppDataContext';
+import { useToast } from '../context/ToastContext';
 
 const navItems = [
   { to: '/registry', label: 'Property Registry' },
@@ -8,27 +10,36 @@ const navItems = [
 ];
 
 export function Navbar() {
+  const { resetData } = useAppData();
+  const { showToast } = useToast();
+
+  const handleReset = () => {
+    resetData();
+    showToast('Demo data reset.', 'info');
+  };
+
   return (
-    <header className="navbar">
-      <div className="navbar-inner">
-        <NavLink to="/registry" className="navbar-brand">
-          BCH Real Estate
-        </NavLink>
-        <nav className="navbar-nav" aria-label="Primary">
-          <ul className="navbar-links">
-            {navItems.map(({ to, label }) => (
-              <li key={to}>
-                <NavLink
-                  to={to}
-                  className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
-                >
-                  {label}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </div>
-    </header>
+    <nav className="navbar">
+      <NavLink to="/registry" className="navbar-brand">
+        BCH Real Estate
+      </NavLink>
+      <ul className="navbar-links">
+        {navItems.map(({ to, label }) => (
+          <li key={to}>
+            <NavLink
+              to={to}
+              className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
+            >
+              {label}
+            </NavLink>
+          </li>
+        ))}
+        <li>
+          <button type="button" className="nav-link nav-reset" onClick={handleReset}>
+            Reset demo
+          </button>
+        </li>
+      </ul>
+    </nav>
   );
 }

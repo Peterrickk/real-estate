@@ -167,7 +167,3 @@ export const mockValuationSummaries: Record<string, ValuationSummary> = {
     lastSaleDate: '2024-06-20',
   },
 };
-
-export function getPropertyById(id: string): Property | undefined {
-  return mockProperties.find((p) => p.id === id);
-}

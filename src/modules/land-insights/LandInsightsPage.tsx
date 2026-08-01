@@ -1,19 +1,16 @@
 import { useState } from 'react';
-import {
-  mockProperties,
-  mockPriceHistory,
-  mockValuationSummaries,
-} from '../../data/mockProperties';
+import { useAppData } from '../../context/AppDataContext';
 import { PriceHistoryChart } from './PriceHistoryChart';
 import { ValuationSummaryCard } from './ValuationSummaryCard';
 
 export function LandInsightsPage() {
-  const tokenizedProperties = mockProperties.filter((p) => p.tokenized);
+  const { data } = useAppData();
+  const tokenizedProperties = data.properties.filter((property) => property.tokenized);
   const [selectedPropertyId, setSelectedPropertyId] = useState(tokenizedProperties[0]?.id ?? '');
 
-  const priceHistory = mockPriceHistory[selectedPropertyId] ?? [];
-  const valuation = mockValuationSummaries[selectedPropertyId];
-  const selectedProperty = mockProperties.find((p) => p.id === selectedPropertyId);
+  const priceHistory = data.priceHistory[selectedPropertyId] ?? [];
+  const valuation = data.valuationSummaries[selectedPropertyId];
+  const selectedProperty = data.properties.find((property) => property.id === selectedPropertyId);
 
   return (
     <section className="page">
