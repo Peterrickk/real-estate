@@ -1,6 +1,12 @@
 import { useState } from 'react';
+<<<<<<< HEAD
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+=======
+import { NavLink, Outlet } from 'react-router-dom';
+import { useAppData } from '../context/AppDataContext';
+import { useToast } from '../context/ToastContext';
+>>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
 import { WalletBalanceBadge } from '../components/WalletBalanceBadge';
 import { FundAccountModal } from '../modules/funding/FundAccountModal';
 
@@ -39,6 +45,7 @@ function FundIcon() {
   );
 }
 
+<<<<<<< HEAD
 function SettingsIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -67,13 +74,29 @@ function LogoutIcon() {
       />
       <path d="M9.5 12h9.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
       <path d="M16 8.5 19.5 12 16 15.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+=======
+function ResetIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M5.5 12a6.5 6.5 0 0 1 11-4.6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      <path d="M16.5 6.5h-3.25" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      <path d="M13.25 6.5v3.25" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      <path d="M18.5 12a6.5 6.5 0 0 1-11 4.6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      <path d="M7.5 17.5h3.25" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      <path d="M10.75 17.5v-3.25" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+>>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
     </svg>
   );
 }
 
 export function DashboardLayout() {
+<<<<<<< HEAD
   const { logout } = useAuth();
   const navigate = useNavigate();
+=======
+  const { resetData } = useAppData();
+  const { showToast } = useToast();
+>>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
   const [fundOpen, setFundOpen] = useState(false);
   const today = new Intl.DateTimeFormat('en-US', {
     weekday: 'long',
@@ -81,9 +104,15 @@ export function DashboardLayout() {
     day: 'numeric',
   }).format(new Date());
 
+<<<<<<< HEAD
   const handleLogout = () => {
     logout();
     navigate('/login', { replace: true });
+=======
+  const handleReset = () => {
+    resetData();
+    showToast('Demo data reset.', 'info');
+>>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
   };
 
   return (
@@ -119,6 +148,7 @@ export function DashboardLayout() {
             <FundIcon />
           </button>
         </nav>
+<<<<<<< HEAD
         <div className="dashboard-sidebar__footer">
           <NavLink
             to="/settings"
@@ -140,6 +170,17 @@ export function DashboardLayout() {
             <LogoutIcon />
           </button>
         </div>
+=======
+        <button
+          type="button"
+          className="dashboard-sidebar__link dashboard-sidebar__action"
+          onClick={handleReset}
+          title="Reset demo"
+          aria-label="Reset demo"
+        >
+          <ResetIcon />
+        </button>
+>>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
       </aside>
 
       <div className="dashboard-frame">

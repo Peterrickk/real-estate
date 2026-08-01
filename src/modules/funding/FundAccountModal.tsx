@@ -17,7 +17,10 @@ interface FundAccountModalProps {
 type Step = 'method' | 'amount' | 'review' | 'done';
 
 const MIN_FIAT = 10;
+<<<<<<< HEAD
 const MAX_FIAT = 50_000;
+=======
+>>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
 
 function formatUsd(amount: number): string {
   return new Intl.NumberFormat('en-US', {
@@ -51,7 +54,11 @@ export function FundAccountModal({ onClose }: FundAccountModalProps) {
 
   const quote = useMemo(() => calculatePurchase(fiatAmount, method), [fiatAmount, method]);
   const methodInfo = FUNDING_METHODS[method];
+<<<<<<< HEAD
   const amountValid = Number.isFinite(fiatAmount) && fiatAmount >= MIN_FIAT && fiatAmount <= MAX_FIAT;
+=======
+  const amountValid = Number.isFinite(fiatAmount) && fiatAmount >= MIN_FIAT;
+>>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
 
   const handleConfirm = () => {
     if (!quote || !amountValid) return;
@@ -138,16 +145,23 @@ export function FundAccountModal({ onClose }: FundAccountModalProps) {
               <input
                 type="number"
                 min={MIN_FIAT}
+<<<<<<< HEAD
                 max={MAX_FIAT}
+=======
+>>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
                 step="1"
                 value={fiatAmount}
                 inputMode="decimal"
                 onChange={(event) => setFiatAmount(Number(event.target.value))}
               />
             </label>
+<<<<<<< HEAD
             <p className="fund-step__hint">
               Min {formatUsd(MIN_FIAT)} · Max {formatUsd(MAX_FIAT)}.
             </p>
+=======
+            <p className="fund-step__hint">Min {formatUsd(MIN_FIAT)}.</p>
+>>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
 
             <div className="purchase-preview">
               <div className="purchase-preview__row">

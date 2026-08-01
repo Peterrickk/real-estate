@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 import { Link } from 'react-router-dom';
+=======
+>>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
 import type { Property } from './types';
 
 const propertyImages = [
@@ -29,11 +32,15 @@ export function PropertyCard({ property }: PropertyCardProps) {
   const imageUrl = propertyImages[imageIndex];
 
   return (
+<<<<<<< HEAD
     <Link
       to="/login"
       className="property-card"
       aria-label={`${property.address} — sign in or create an account to view full details`}
     >
+=======
+    <article className="property-card">
+>>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
       <div className="property-card__media">
         <img className="property-card__image" src={imageUrl} alt={property.address} />
         <span className="property-card__status">{statusLabel}</span>
@@ -43,6 +50,10 @@ export function PropertyCard({ property }: PropertyCardProps) {
         <h3 className="property-card__address">{property.address}</h3>
         <p className="property-card__price">{formatPrice(property.listedPrice)}</p>
       </div>
+<<<<<<< HEAD
     </Link>
+=======
+    </article>
+>>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
   );
 }

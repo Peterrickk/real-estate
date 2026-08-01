@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 export function LoginPanelPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
+<<<<<<< HEAD
   const [email, setEmail] = useState('avery@example.com');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -19,6 +20,19 @@ export function LoginPanelPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong. Try again.');
     }
+=======
+  const [displayName, setDisplayName] = useState('Avery');
+  const [email, setEmail] = useState('avery@example.com');
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    login({
+      displayName,
+      email,
+      preferredHome: '/marketplace',
+    });
+    navigate('/marketplace', { replace: true });
+>>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
   };
 
   return (
@@ -78,6 +92,7 @@ export function LoginPanelPage() {
 
           <form className="auth-form" onSubmit={handleSubmit}>
             <label className="filter-field">
+<<<<<<< HEAD
               <span>Email</span>
               <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} />
             </label>
@@ -97,6 +112,17 @@ export function LoginPanelPage() {
               </p>
             ) : null}
 
+=======
+              <span>Name</span>
+              <input value={displayName} onChange={(event) => setDisplayName(event.target.value)} />
+            </label>
+
+            <label className="filter-field">
+              <span>Email</span>
+              <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} />
+            </label>
+
+>>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
             <button type="submit" className="btn btn-primary auth-submit">
               Continue
             </button>

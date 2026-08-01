@@ -7,7 +7,10 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+<<<<<<< HEAD
 import { registerAccount, seedDemoAccounts, updateStoredAccount, verifyAccount } from '../lib/authStore';
+=======
+>>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
 
 export type HomeRoute = '/marketplace' | '/seller' | '/history' | '/insights';
 
@@ -18,6 +21,7 @@ export interface AuthUser {
 }
 
 interface LoginInput {
+<<<<<<< HEAD
   email: string;
   password: string;
 }
@@ -26,6 +30,10 @@ interface SignupInput {
   displayName: string;
   email: string;
   password: string;
+=======
+  displayName: string;
+  email: string;
+>>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
   preferredHome?: HomeRoute;
 }
 
@@ -38,8 +46,12 @@ interface UpdateProfileInput {
 interface AuthContextValue {
   user: AuthUser | null;
   isAuthenticated: boolean;
+<<<<<<< HEAD
   login: (input: LoginInput) => Promise<void>;
   signup: (input: SignupInput) => Promise<void>;
+=======
+  login: (input: LoginInput) => void;
+>>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
   logout: () => void;
   updateProfile: (input: UpdateProfileInput) => void;
 }
@@ -68,10 +80,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(() => loadAuthUser());
 
   useEffect(() => {
+<<<<<<< HEAD
     void seedDemoAccounts();
   }, []);
 
   useEffect(() => {
+=======
+>>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
     if (user) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
       return;
@@ -80,6 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(STORAGE_KEY);
   }, [user]);
 
+<<<<<<< HEAD
   const login = useCallback(async (input: LoginInput) => {
     const account = await verifyAccount(input.email, input.password);
     setUser({
@@ -101,6 +117,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: account.email,
       preferredHome: account.preferredHome,
     });
+=======
+  const login = useCallback((input: LoginInput) => {
+    setUser({
+      displayName: input.displayName.trim() || 'Avery',
+      email: input.email.trim(),
+      preferredHome: normalizeHome(input.preferredHome),
+    });
+>>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
   }, []);
 
   const logout = useCallback(() => {
@@ -111,11 +135,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser((current) => {
       if (!current) return current;
 
+<<<<<<< HEAD
       const next: AuthUser = {
+=======
+      return {
+        ...current,
+>>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
         displayName: input.displayName?.trim() || current.displayName,
         email: input.email?.trim() || current.email,
         preferredHome: normalizeHome(input.preferredHome ?? current.preferredHome),
       };
+<<<<<<< HEAD
 
       updateStoredAccount(current.email, {
         displayName: next.displayName,
@@ -124,6 +154,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       return next;
+=======
+>>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
     });
   }, []);
 
@@ -132,11 +164,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       isAuthenticated: Boolean(user),
       login,
+<<<<<<< HEAD
       signup,
       logout,
       updateProfile,
     }),
     [user, login, signup, logout, updateProfile],
+=======
+      logout,
+      updateProfile,
+    }),
+    [user, login, logout, updateProfile],
+>>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
