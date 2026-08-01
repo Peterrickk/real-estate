@@ -5,11 +5,13 @@ import { EmptyState } from '../../components/EmptyState';
 import type { Property } from '../property-registry/types';
 import { CreateListingModal } from './CreateListingModal';
 import { ListPropertyModal } from './ListPropertyModal';
+import { TokenizePropertyModal } from './TokenizePropertyModal';
 import { OfferReviewCard } from './OfferReviewCard';
 import { SellerEscrowCard } from './SellerEscrowCard';
 import { formatPrice } from './types';
 
 type ListingModalState = { mode: 'edit'; property: Property; listingId: string; currentPrice: number };
+type TokenizeModalState = { property: Property } | null;
 
 function PropertiesIcon() {
   return (
@@ -80,6 +82,7 @@ export function SellerDashboardPage() {
   const [listingModal, setListingModal] = useState<ListingModalState | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createForPropertyId, setCreateForPropertyId] = useState<string | undefined>();
+  const [tokenizeModal, setTokenizeModal] = useState<TokenizeModalState>(null);
 
   const sellerProperties = getSellerProperties();
   const sellerListings = getSellerListings();
@@ -171,6 +174,16 @@ export function SellerDashboardPage() {
     );
   };
 
+  const handleTokenizeProperty = (tokenId: string) => {
+    // In a real app, this would update the property in the data store
+    const shortTokenId = tokenId.length > 8 ? tokenId.slice(0, 8) + '...' : tokenId;
+    showToast(
+      `Property tokenized successfully! Token ID: ${shortTokenId}`,
+      'success',
+    );
+    setTokenizeModal(null);
+  };
+
   return (
     <section className="dashboard-page seller-dashboard">
       <header className="page-intro">
@@ -254,6 +267,15 @@ export function SellerDashboardPage() {
                   </dl>
 
                   <div className="button-row">
+                    {!property.tokenized && (
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={() => setTokenizeModal({ property })}
+                      >
+                        Tokenize as NFT
+                      </button>
+                    )}
                     {!isListed && property.tokenized && (
                       <button
                         type="button"
@@ -368,6 +390,14 @@ export function SellerDashboardPage() {
           submitLabel="Save price"
           onSubmit={handleListSubmit}
           onClose={() => setListingModal(null)}
+        />
+      )}
+
+      {tokenizeModal && (
+        <TokenizePropertyModal
+          property={tokenizeModal.property}
+          onSubmit={handleTokenizeProperty}
+          onClose={() => setTokenizeModal(null)}
         />
       )}
     </section>

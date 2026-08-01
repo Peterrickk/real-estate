@@ -1,0 +1,83 @@
+// Property NFT contract for Bitcoin Cash real estate marketplace
+//
+// This contract manages property NFTs that represent real estate ownership.
+// Each property is represented as a unique NFT with comprehensive metadata.
+//
+// Features:
+// - Minting property NFTs with metadata commitment
+// - Transferring NFTs between owners
+// - Integration with escrow for sales
+
+pragma cashscript ^0.13.0;
+
+contract PropertyNFT() {
+    // Mint a new property NFT with metadata commitment
+    function mintProperty(
+        pubkey minterPubkey,
+        sig minterSig,
+        bytes32 tokenId,
+        bytes nftCommitment,
+        pubkey ownerPubkey
+    ) {
+        // Verify minter authorization
+        require(checkSig(minterSig, minterPubkey));
+        
+        // Ensure the NFT commitment is properly set
+        require(tx.outputs[0].nftCommitment == nftCommitment);
+        
+        // Ensure output goes to the new owner with correct token category
+        require(tx.outputs[0].tokenCategory == tokenId);
+        
+        // Owner receives the NFT with minimal BCH for wallet compatibility
+        require(tx.outputs[0].value == 1000);
+        
+        // Create P2PKH lock for the owner
+        bytes25 ownerLock = new LockingBytecodeP2PKH(hash160(ownerPubkey));
+        require(tx.outputs[0].lockingBytecode == ownerLock);
+    }
+    
+    // Transfer property NFT to new owner
+    function transferProperty(
+        pubkey currentOwnerPubkey,
+        sig currentOwnerSig,
+        pubkey newOwnerPubkey,
+        bytes32 tokenId
+    ) {
+        // Verify current owner signature
+        require(checkSig(currentOwnerSig, currentOwnerPubkey));
+        
+        // Ensure token category matches
+        require(tx.inputs[0].tokenCategory == tokenId);
+        
+        // Preserve NFT commitment (immutable)
+        require(tx.outputs[0].nftCommitment == tx.inputs[0].nftCommitment);
+        
+        // Ensure output goes to new owner with same token category
+        require(tx.outputs[0].tokenCategory == tokenId);
+        
+        // New owner receives the NFT with minimal BCH
+        require(tx.outputs[0].value == 1000);
+        
+        // Create P2PKH lock for the new owner
+        bytes25 newOwnerLock = new LockingBytecodeP2PKH(hash160(newOwnerPubkey));
+        require(tx.outputs[0].lockingBytecode == newOwnerLock);
+    }
+    
+    // Transfer through escrow (marketplace integration)
+    function escrowTransfer(
+        bytes32 tokenId,
+        bytes nftCommitment,
+        bytes escrowContract
+    ) {
+        // Verify input has the correct NFT
+        require(tx.inputs[0].tokenCategory == tokenId);
+        
+        // Transfer NFT to escrow contract with commitment
+        require(tx.outputs[0].tokenCategory == tokenId);
+        require(tx.outputs[0].nftCommitment == nftCommitment);
+        require(tx.outputs[0].lockingBytecode == escrowContract);
+        
+        // Minimal BCH for escrow
+        require(tx.outputs[0].value == 1000);
+    }
+}

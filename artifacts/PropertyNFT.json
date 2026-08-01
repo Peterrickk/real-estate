@@ -1,0 +1,69 @@
+{
+  "contractName": "PropertyNFT",
+  "constructorInputs": [],
+  "abi": [
+    {
+      "name": "mintProperty",
+      "inputs": [
+        { "name": "minterPubkey", "type": "pubkey" },
+        { "name": "minterSig", "type": "sig" },
+        { "name": "tokenId", "type": "bytes32" },
+        { "name": "nftCommitment", "type": "bytes" },
+        { "name": "ownerPubkey", "type": "pubkey" }
+      ]
+    },
+    {
+      "name": "transferProperty",
+      "inputs": [
+        { "name": "currentOwnerPubkey", "type": "pubkey" },
+        { "name": "currentOwnerSig", "type": "sig" },
+        { "name": "newOwnerPubkey", "type": "pubkey" },
+        { "name": "tokenId", "type": "bytes32" }
+      ]
+    },
+    {
+      "name": "escrowTransfer",
+      "inputs": [
+        { "name": "tokenId", "type": "bytes32" },
+        { "name": "nftCommitment", "type": "bytes" },
+        { "name": "escrowContract", "type": "bytes" }
+      ]
+    }
+  ],
+  "bytecode": "OP_DUP OP_0 OP_NUMEQUAL OP_IF OP_3 OP_ROLL OP_SIZE 20 OP_EQUALVERIFY OP_2SWAP OP_CHECKSIGVERIFY OP_0 OP_OUTPUTTOKENCOMMITMENT OP_3 OP_ROLL OP_EQUALVERIFY OP_0 OP_OUTPUTTOKENCATEGORY OP_EQUALVERIFY OP_0 OP_OUTPUTVALUE e803 OP_NUMEQUALVERIFY 76a914 OP_ROT OP_HASH160 OP_CAT 88ac OP_CAT OP_0 OP_OUTPUTBYTECODE OP_EQUAL OP_NIP OP_ELSE OP_DUP OP_1 OP_NUMEQUAL OP_IF OP_4 OP_ROLL OP_SIZE 20 OP_EQUALVERIFY OP_2SWAP OP_CHECKSIGVERIFY OP_0 OP_UTXOTOKENCATEGORY OP_OVER OP_EQUALVERIFY OP_0 OP_OUTPUTTOKENCOMMITMENT OP_0 OP_UTXOTOKENCOMMITMENT OP_EQUALVERIFY OP_0 OP_OUTPUTTOKENCATEGORY OP_EQUALVERIFY OP_0 OP_OUTPUTVALUE e803 OP_NUMEQUALVERIFY 76a914 OP_ROT OP_HASH160 OP_CAT 88ac OP_CAT OP_0 OP_OUTPUTBYTECODE OP_EQUAL OP_NIP OP_ELSE OP_2 OP_NUMEQUALVERIFY OP_SIZE 20 OP_EQUALVERIFY OP_0 OP_UTXOTOKENCATEGORY OP_OVER OP_EQUALVERIFY OP_0 OP_OUTPUTTOKENCATEGORY OP_EQUALVERIFY OP_0 OP_OUTPUTTOKENCOMMITMENT OP_EQUALVERIFY OP_0 OP_OUTPUTBYTECODE OP_EQUALVERIFY OP_0 OP_OUTPUTVALUE e803 OP_NUMEQUAL OP_ENDIF OP_ENDIF",
+  "source": "// Property NFT contract for Bitcoin Cash real estate marketplace\n//\n// This contract manages property NFTs that represent real estate ownership.\n// Each property is represented as a unique NFT with comprehensive metadata.\n//\n// Features:\n// - Minting property NFTs with metadata commitment\n// - Transferring NFTs between owners\n// - Integration with escrow for sales\n\npragma cashscript ^0.13.0;\n\ncontract PropertyNFT() {\n    // Mint a new property NFT with metadata commitment\n    function mintProperty(\n        pubkey minterPubkey,\n        sig minterSig,\n        bytes32 tokenId,\n        bytes nftCommitment,\n        pubkey ownerPubkey\n    ) {\n        // Verify minter authorization\n        require(checkSig(minterSig, minterPubkey));\n        \n        // Ensure the NFT commitment is properly set\n        require(tx.outputs[0].nftCommitment == nftCommitment);\n        \n        // Ensure output goes to the new owner with correct token category\n        require(tx.outputs[0].tokenCategory == tokenId);\n        \n        // Owner receives the NFT with minimal BCH for wallet compatibility\n        require(tx.outputs[0].value == 1000);\n        \n        // Create P2PKH lock for the owner\n        bytes25 ownerLock = new LockingBytecodeP2PKH(hash160(ownerPubkey));\n        require(tx.outputs[0].lockingBytecode == ownerLock);\n    }\n    \n    // Transfer property NFT to new owner\n    function transferProperty(\n        pubkey currentOwnerPubkey,\n        sig currentOwnerSig,\n        pubkey newOwnerPubkey,\n        bytes32 tokenId\n    ) {\n        // Verify current owner signature\n        require(checkSig(currentOwnerSig, currentOwnerPubkey));\n        \n        // Ensure token category matches\n        require(tx.inputs[0].tokenCategory == tokenId);\n        \n        // Preserve NFT commitment (immutable)\n        require(tx.outputs[0].nftCommitment == tx.inputs[0].nftCommitment);\n        \n        // Ensure output goes to new owner with same token category\n        require(tx.outputs[0].tokenCategory == tokenId);\n        \n        // New owner receives the NFT with minimal BCH\n        require(tx.outputs[0].value == 1000);\n        \n        // Create P2PKH lock for the new owner\n        bytes25 newOwnerLock = new LockingBytecodeP2PKH(hash160(newOwnerPubkey));\n        require(tx.outputs[0].lockingBytecode == newOwnerLock);\n    }\n    \n    // Transfer through escrow (marketplace integration)\n    function escrowTransfer(\n        bytes32 tokenId,\n        bytes nftCommitment,\n        bytes escrowContract\n    ) {\n        // Verify input has the correct NFT\n        require(tx.inputs[0].tokenCategory == tokenId);\n        \n        // Transfer NFT to escrow contract with commitment\n        require(tx.outputs[0].tokenCategory == tokenId);\n        require(tx.outputs[0].nftCommitment == nftCommitment);\n        require(tx.outputs[0].lockingBytecode == escrowContract);\n        \n        // Minimal BCH for escrow\n        require(tx.outputs[0].value == 1000);\n    }\n}",
+  "fingerprint": "d403f63f1700c561760bf32f6aa32d8a4d9b97e1b67640f5b1769913d696719d",
+  "debug": {
+    "bytecode": "76009c63537a8201208872ad00d2537a8800d18800cc02e8039d0376a9147ba97e0288ac7e00cd87776776519c63547a8201208872ad00ce788800d200cf8800d18800cc02e8039d0376a9147ba97e0288ac7e00cd877767529d8201208800ce788800d18800d28800cd8800cc02e8039c6868",
+    "sourceMap": "15:4:37:5;;;;18:8:18:23;;;;;23:25:23:48;:8::51:1;26:27:26:28:0;:16::43:1;:47::60:0;;:8::62:1;29:27:29:28:0;:16::43:1;:8::56;32:27:32:28:0;:16::35:1;:39::43:0;:8::45:1;35:28:35:74:0;:61::72;:53::73:1;:28::74;;;36:27:36:28:0;:16::45:1;:8::60;21:6:37:5;15:4;40::64::0;;;;44:8:44:23;;;;;47:25:47:60;:8::63:1;50:26:50:27:0;:16::42:1;:46::53:0;:8::55:1;53:27:53:28:0;:16::43:1;:57::58:0;:47::73:1;:8::75;56:27:56:28:0;:16::43:1;:8::56;59:27:59:28:0;:16::35:1;:39::43:0;:8::45:1;62:31:62:80:0;:64::78;:56::79:1;:31::80;;;63:27:63:28:0;:16::45:1;:8::63;45:6:64:5;40:4;67::82::0;;68:8:68:23;;;73:26:73:27;:16::42:1;:46::53:0;:8::55:1;76:27:76:28:0;:16::43:1;:8::56;77:27:77:28:0;:16::43:1;:8::62;78:27:78:28:0;:16::45:1;:8::65;81:27:81:28:0;:16::35:1;:39::43:0;:8::45:1;13:0:83:1;",
+    "logs": [],
+    "requires": [
+      { "ip": 10, "line": 23 },
+      { "ip": 15, "line": 26 },
+      { "ip": 18, "line": 29 },
+      { "ip": 22, "line": 32 },
+      { "ip": 32, "line": 36 },
+      { "ip": 44, "line": 47 },
+      { "ip": 48, "line": 50 },
+      { "ip": 53, "line": 53 },
+      { "ip": 56, "line": 56 },
+      { "ip": 60, "line": 59 },
+      { "ip": 70, "line": 63 },
+      { "ip": 80, "line": 73 },
+      { "ip": 83, "line": 76 },
+      { "ip": 86, "line": 77 },
+      { "ip": 89, "line": 78 },
+      { "ip": 94, "line": 81 }
+    ],
+    "sourceTags": "4:8:pv;32:32:sc;38:42:pv;70:70:sc;74:76:pv"
+  },
+  "compiler": {
+    "name": "cashc",
+    "version": "0.13.2",
+    "options": {
+      "enforceFunctionParameterTypes": true,
+      "enforceLocktimeGuard": true
+    }
+  },
+  "updatedAt": "2026-08-01T17:35:39.092Z"
+}
