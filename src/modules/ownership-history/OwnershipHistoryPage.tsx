@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { PropertyMap } from '../../components/PropertyMap';
 import { useAppData } from '../../context/AppDataContext';
 import { filterByLocation, toMapProperty, type LocationSelection } from '../../lib/mapUtils';
@@ -16,9 +17,23 @@ function toggleFilterValue(values: string[], value: string): string[] {
 export function OwnershipHistoryPage() {
   const { data } = useAppData();
   const tokenizedProperties = data.properties.filter((property) => property.tokenized);
-  const [selectedPropertyId, setSelectedPropertyId] = useState(tokenizedProperties[0]?.id ?? '');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const propertyParam = searchParams.get('property');
+  const paramPropertyId =
+    propertyParam && tokenizedProperties.some((property) => property.id === propertyParam)
+      ? propertyParam
+      : null;
+  const [localPropertyId, setLocalPropertyId] = useState(tokenizedProperties[0]?.id ?? '');
   const [locationSelection, setLocationSelection] = useState<LocationSelection | null>(null);
   const [selectedSources, setSelectedSources] = useState<string[]>(['registry', 'escrow']);
+
+  // A `?property=` param (arriving from a marketplace card) takes precedence.
+  const selectedPropertyId = paramPropertyId ?? localPropertyId;
+
+  const handlePropertyChange = (id: string) => {
+    setLocalPropertyId(id);
+    setSearchParams(id ? { property: id } : {}, { replace: true });
+  };
 
   // Get location options from tokenized properties
   const locationOptions = useMemo(() => {
@@ -99,7 +114,7 @@ export function OwnershipHistoryPage() {
             <select
               id="property-select"
               value={selectedPropertyId}
-              onChange={(event) => setSelectedPropertyId(event.target.value)}
+              onChange={(event) => handlePropertyChange(event.target.value)}
             >
               {tokenizedProperties.map((property) => (
                 <option key={property.id} value={property.id}>

@@ -1,8 +1,16 @@
 import { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { PropertyMap } from '../../components/PropertyMap';
 import { useAppData } from '../../context/AppDataContext';
+import { useHazardData } from '../../hooks/useHazardData';
+import { assessPropertyHazard } from '../../lib/hazards/assess';
+import { earthquakesNear } from '../../lib/hazards/usgs';
+import type { PropertyHazardAssessment } from '../../lib/hazards/types';
 import { filterByLocation, toMapProperty, type LocationSelection } from '../../lib/mapUtils';
+import { HazardMapPanel } from './HazardMapPanel';
+import { LandHistoryPanel } from './LandHistoryPanel';
 import { PriceHistoryChart } from './PriceHistoryChart';
+import { RiskAdjustedValuationCard } from './RiskAdjustedValuationCard';
 import { ValuationSummaryCard } from './ValuationSummaryCard';
 
 const sourceFilters = [
@@ -16,10 +24,31 @@ function toggleFilterValue(values: string[], value: string): string[] {
 
 export function LandInsightsPage() {
   const { data } = useAppData();
-  const tokenizedProperties = data.properties.filter((property) => property.tokenized);
-  const [selectedPropertyId, setSelectedPropertyId] = useState(tokenizedProperties[0]?.id ?? '');
+  const tokenizedProperties = useMemo(
+    () => data.properties.filter((property) => property.tokenized),
+    [data.properties],
+  );
+  const [searchParams, setSearchParams] = useSearchParams();
+  const propertyParam = searchParams.get('property');
+  const paramPropertyId =
+    propertyParam && tokenizedProperties.some((property) => property.id === propertyParam)
+      ? propertyParam
+      : null;
+  const [localPropertyId, setLocalPropertyId] = useState(tokenizedProperties[0]?.id ?? '');
   const [locationSelection, setLocationSelection] = useState<LocationSelection | null>(null);
   const [selectedSources, setSelectedSources] = useState<string[]>(['appraisal', 'escrow']);
+  const [activeSignals, setActiveSignals] = useState<Record<string, boolean>>({});
+
+  // A `?property=` param (arriving from a marketplace card) takes precedence.
+  const selectedPropertyId = paramPropertyId ?? localPropertyId;
+
+  const handlePropertyChange = (id: string) => {
+    setLocalPropertyId(id);
+    setSearchParams(id ? { property: id } : {}, { replace: true });
+  };
+
+  const { earthquakes, elevations, loading, error, lastUpdated, refresh } =
+    useHazardData(tokenizedProperties);
 
   // Get location options from tokenized properties
   const locationOptions = useMemo(() => {
@@ -55,6 +84,43 @@ export function LandInsightsPage() {
     () => locationFilteredProperties.map((property) => toMapProperty(property, property.size)),
     [locationFilteredProperties],
   );
+
+  // Live hazard assessments for every tokenized property.
+  const assessments = useMemo(() => {
+    const map: Record<string, PropertyHazardAssessment> = {};
+    for (const property of tokenizedProperties) {
+      map[property.id] = assessPropertyHazard(property, elevations, earthquakes);
+    }
+    return map;
+  }, [tokenizedProperties, elevations, earthquakes]);
+
+  const selectedAssessment = selectedPropertyId ? (assessments[selectedPropertyId] ?? null) : null;
+
+  const nearbyEarthquakes = useMemo(() => {
+    if (!selectedProperty) return [];
+    return earthquakesNear(earthquakes, selectedProperty).map(({ event, distanceKm }) => ({
+      ...event,
+      distanceKm,
+    }));
+  }, [earthquakes, selectedProperty]);
+
+  // Only development signals the user left active feed the valuation engine.
+  const valuationAssessment = useMemo(() => {
+    if (!selectedAssessment) return null;
+    const development = selectedAssessment.development.filter(
+      (signal) => activeSignals[`${selectedAssessment.propertyId}:${signal.label}`] ?? true,
+    );
+    return development.length === selectedAssessment.development.length
+      ? selectedAssessment
+      : { ...selectedAssessment, development };
+  }, [selectedAssessment, activeSignals]);
+
+  const baseValue = valuation?.currentEstimatedValue ?? selectedProperty?.listedPrice ?? 0;
+
+  const toggleSignal = (propertyId: string, label: string) => {
+    const key = `${propertyId}:${label}`;
+    setActiveSignals((current) => ({ ...current, [key]: !(current[key] ?? true) }));
+  };
 
   return (
     <section className="dashboard-page">
@@ -98,7 +164,7 @@ export function LandInsightsPage() {
             <select
               id="insights-property-select"
               value={selectedPropertyId}
-              onChange={(event) => setSelectedPropertyId(event.target.value)}
+              onChange={(event) => handlePropertyChange(event.target.value)}
             >
               {tokenizedProperties.map((property) => (
                 <option key={property.id} value={property.id}>
@@ -145,14 +211,38 @@ export function LandInsightsPage() {
 
           <div className="insights-stack">
             {valuation && <ValuationSummaryCard summary={valuation} />}
+            <RiskAdjustedValuationCard
+              baseValue={baseValue}
+              assessment={valuationAssessment}
+            />
             <article className="card chart-card">
               <h3>Price History</h3>
               <PriceHistoryChart data={priceHistory} />
             </article>
+            <LandHistoryPanel
+              property={selectedProperty ?? null}
+              assessment={selectedAssessment}
+              nearbyEarthquakes={nearbyEarthquakes}
+              activeSignals={activeSignals}
+              onToggleSignal={toggleSignal}
+              lastUpdated={lastUpdated}
+              loading={loading}
+              onRefresh={refresh}
+            />
           </div>
         </div>
 
         <div className="map-panel">
+          <HazardMapPanel
+            title="Hazard & land history"
+            properties={comparableProperties}
+            assessments={assessments}
+            earthquakes={earthquakes}
+            center={locationSelection ?? undefined}
+            highlightedId={selectedPropertyId}
+            loading={loading}
+            error={error}
+          />
           <PropertyMap
             title="Comparable properties"
             properties={comparableProperties}

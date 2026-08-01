@@ -51,7 +51,15 @@ export function loadAppData(): AppData {
 
     const properties = (parsed.properties ?? defaults.properties).map((property) => {
       const fallback = defaults.properties.find((item) => item.id === property.id);
-      return fallback ? { ...fallback, ...property, lat: property.lat ?? fallback.lat, lng: property.lng ?? fallback.lng } : property;
+      return fallback
+        ? {
+            ...fallback,
+            ...property,
+            lat: property.lat ?? fallback.lat,
+            lng: property.lng ?? fallback.lng,
+            hazard: property.hazard ?? fallback.hazard,
+          }
+        : property;
     });
 
     return {

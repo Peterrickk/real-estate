@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useAppData } from '../../context/AppDataContext';
 import { useToast } from '../../context/ToastContext';
+import { EmptyState } from '../../components/EmptyState';
 import type { Property } from '../property-registry/types';
 import { CreateListingModal } from './CreateListingModal';
 import { ListPropertyModal } from './ListPropertyModal';
@@ -9,6 +10,58 @@ import { SellerEscrowCard } from './SellerEscrowCard';
 import { formatPrice } from './types';
 
 type ListingModalState = { mode: 'edit'; property: Property; listingId: string; currentPrice: number };
+
+function PropertiesIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 21h18" />
+      <path d="M5 21V7.62L12 3l7 4.62V21" />
+      <path d="M9.5 21v-5h5v5" />
+    </svg>
+  );
+}
+
+function InboxIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M22 12h-6l-2 3h-4l-2-3H2" />
+      <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+    </svg>
+  );
+}
+
+function EscrowIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      <path d="M9 11.5l2 2 4-4" />
+    </svg>
+  );
+}
 
 export function SellerDashboardPage() {
   const {
@@ -128,21 +181,21 @@ export function SellerDashboardPage() {
       </header>
 
       <div className="seller-stats">
-        <article className="card seller-stat-card">
+        <article className="seller-stat-card">
           <p className="muted">Listed</p>
           <p className="seller-stat-value">{sellerListings.length}</p>
         </article>
-        <article className="card seller-stat-card">
+        <article className="seller-stat-card">
           <p className="muted">Pending offers</p>
           <p className="seller-stat-value">{sellerOffers.length}</p>
         </article>
-        <article className="card seller-stat-card">
+        <article className="seller-stat-card">
           <p className="muted">Active escrows</p>
           <p className="seller-stat-value">{sellerEscrows.length}</p>
         </article>
       </div>
 
-      <section className="seller-section">
+      <section className="seller-section seller-section--properties">
         <div className="seller-section__header">
           <h3>My Properties</h3>
           <button
@@ -160,7 +213,11 @@ export function SellerDashboardPage() {
           </p>
         )}
         {sellerProperties.length === 0 ? (
-          <p className="empty-state">No properties owned by the demo seller.</p>
+          <EmptyState
+            icon={<PropertiesIcon />}
+            title="No properties yet"
+            hint="Properties you own will appear here, ready to be tokenized and listed."
+          />
         ) : (
           <div className="results-stack">
             {sellerProperties.map((property) => {
@@ -168,7 +225,7 @@ export function SellerDashboardPage() {
               const isListed = Boolean(listing);
 
               return (
-                <article key={property.id} className="card result-card">
+                <article key={property.id} className="card result-card seller-property-card">
                   <div className="result-card__header">
                     <div>
                       <p className="result-card__eyebrow">Your property</p>
@@ -190,7 +247,7 @@ export function SellerDashboardPage() {
                     </div>
                     <div>
                       <dt>Listed price</dt>
-                      <dd>
+                      <dd className={property.listedPrice !== null ? 'stat-primary' : undefined}>
                         {property.listedPrice !== null ? formatPrice(property.listedPrice) : '—'}
                       </dd>
                     </div>
@@ -239,12 +296,14 @@ export function SellerDashboardPage() {
         )}
       </section>
 
-      <section className="seller-section">
+      <section className="seller-section seller-section--offers">
         <h3>Incoming Offers</h3>
         {sellerOffers.length === 0 ? (
-          <p className="empty-state">
-            No pending offers. Buyers can submit offers from the Marketplace.
-          </p>
+          <EmptyState
+            icon={<InboxIcon />}
+            title="No incoming offers yet"
+            hint="When buyers make an offer on your listings, it will land here for your review."
+          />
         ) : (
           <div className="results-stack">
             {sellerOffers.map((offer) => {
@@ -263,10 +322,14 @@ export function SellerDashboardPage() {
         )}
       </section>
 
-      <section className="seller-section">
+      <section className="seller-section seller-section--escrows">
         <h3>Active Escrows</h3>
         {sellerEscrows.length === 0 ? (
-          <p className="empty-state">No active escrow deals for your listings.</p>
+          <EmptyState
+            icon={<EscrowIcon />}
+            title="No active escrows"
+            hint="Accepted offers become escrow deals, which you can complete or close out from here."
+          />
         ) : (
           <div className="results-stack">
             {sellerEscrows.map((deal) => {

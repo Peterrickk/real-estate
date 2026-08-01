@@ -22,7 +22,7 @@ export function OfferReviewCard({ offer, address, onAccept, onReject }: OfferRev
       <dl className="result-card__stats">
         <div>
           <dt>Offer</dt>
-          <dd>{formatPrice(offer.offerAmount)}</dd>
+          <dd className="stat-primary">{formatPrice(offer.offerAmount)}</dd>
         </div>
         <div>
           <dt>Buyer</dt>

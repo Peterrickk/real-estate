@@ -16,6 +16,26 @@ export const mockProperties: Property[] = [
     tokenized: true,
     lat: 25.7781,
     lng: -80.2197,
+    hazard: {
+      floodZone: 'Coastal / AE',
+      terrainClass: 'lowland',
+      seismicBaseline: 'low',
+      elevationM: 2,
+      developmentSignals: [
+        {
+          label: 'Waterfront mixed-use redevelopment',
+          distanceKm: 0.8,
+          signal: 'positive',
+          note: 'Under construction two blocks away',
+        },
+        {
+          label: 'Metrorail station expansion',
+          distanceKm: 1.5,
+          signal: 'positive',
+          note: 'Transit upgrades approved',
+        },
+      ],
+    },
   },
   {
     id: 'prop-002',
@@ -29,6 +49,20 @@ export const mockProperties: Property[] = [
     tokenized: true,
     lat: 30.2672,
     lng: -97.7431,
+    hazard: {
+      floodZone: 'X (minimal)',
+      terrainClass: 'upland',
+      seismicBaseline: 'low',
+      elevationM: 149,
+      developmentSignals: [
+        {
+          label: 'Tech office campus under construction',
+          distanceKm: 1.2,
+          signal: 'positive',
+          note: 'Two towers breaking ground',
+        },
+      ],
+    },
   },
   {
     id: 'prop-003',
@@ -42,6 +76,12 @@ export const mockProperties: Property[] = [
     tokenized: true,
     lat: 33.5722,
     lng: -112.0892,
+    hazard: {
+      floodZone: 'X (minimal)',
+      terrainClass: 'upland',
+      seismicBaseline: 'low',
+      elevationM: 331,
+    },
   },
   {
     id: 'prop-004',
@@ -55,6 +95,12 @@ export const mockProperties: Property[] = [
     tokenized: false,
     lat: 39.7392,
     lng: -104.9903,
+    hazard: {
+      floodZone: 'X (minimal)',
+      terrainClass: 'steep',
+      seismicBaseline: 'moderate',
+      elevationM: 1609,
+    },
   },
 ];
 

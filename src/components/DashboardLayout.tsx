@@ -1,12 +1,11 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAppData } from '../context/AppDataContext';
 import { useToast } from '../context/ToastContext';
+import { WalletBalanceBadge } from '../components/WalletBalanceBadge';
 
 const navItems = [
   { to: '/marketplace', label: 'Marketplace', icon: MarketIcon },
   { to: '/seller', label: 'Seller Dashboard', icon: SellerIcon },
-  { to: '/history', label: 'Ownership History', icon: HistoryIcon },
-  { to: '/insights', label: 'Land Insights', icon: InsightsIcon },
 ];
 
 function MarketIcon() {
@@ -25,29 +24,6 @@ function SellerIcon() {
       <path d="M5 18.5h14" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
       <path d="M7.5 8.5 12 5l4.5 3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M8.5 18.5v-7H15v7" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function HistoryIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M6 5.5h9.5L19 9v9.5H6z" fill="none" stroke="currentColor" strokeWidth="1.7" />
-      <path d="M9 5.5V3.25" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-      <path d="M12.5 5.5V3.25" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-      <path d="M9 12.5h6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-      <path d="M9 16h4.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function InsightsIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M5 18.5h14" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-      <path d="M7 17V11.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-      <path d="M12 17V8" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-      <path d="M17 17V5.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
     </svg>
   );
 }
@@ -120,7 +96,10 @@ export function DashboardLayout() {
             <p className="dashboard-header__eyebrow">Real estate operations</p>
             <h1>Welcome, Avery</h1>
           </div>
-          <p className="dashboard-header__date">{today}</p>
+          <div className="dashboard-header__meta">
+            <p className="dashboard-header__date">{today}</p>
+            <WalletBalanceBadge />
+          </div>
         </header>
 
         <main id="main-content" className="dashboard-main" tabIndex={-1}>

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { LocationSelection } from '../../lib/mapUtils';
+import type { LocationSelection } from '../lib/mapUtils';
 
 interface LocationAutocompleteProps {
   id?: string;
@@ -62,7 +62,6 @@ export function LocationAutocomplete({
         id={id}
         value={value?.address ?? ''}
         onChange={handleChange}
-        placeholder={placeholder}
         className="location-autocomplete"
       >
         <option value="">{placeholder}</option>

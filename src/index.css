@@ -244,6 +244,47 @@ img {
   font-style: italic;
 }
 
+.empty-state--panel {
+  padding: 1.75rem 1rem;
+  text-align: center;
+  font-style: normal;
+}
+
+.empty-state__icon {
+  display: grid;
+  place-items: center;
+  width: 2.9rem;
+  height: 2.9rem;
+  margin: 0 auto 0.85rem;
+  border-radius: 999px;
+  background: var(--color-verdigris-muted);
+  color: var(--color-verdigris-deep);
+}
+
+.empty-state__icon svg {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.empty-state__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+  font-style: normal;
+}
+
+.empty-state__hint {
+  margin: 0.4rem auto 0;
+  max-width: 44ch;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-ink-muted);
+  font-style: normal;
+}
+
 /* Cards */
 
 .card-grid {
@@ -300,6 +341,13 @@ img {
   color: var(--color-parchment-elevated);
 }
 
+.dashboard-sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .dashboard-sidebar__brand,
 .dashboard-sidebar__link {
   display: grid;
@@ -347,9 +395,9 @@ img {
 
 .dashboard-header {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 2rem;
   padding: 1.5rem var(--space-page) 0;
 }
 
@@ -380,6 +428,146 @@ img {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   font-size: 0.74rem;
+}
+
+.dashboard-header__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4rem;
+  padding-left: 2rem;
+  border-left: 1px solid var(--color-border);
+}
+
+@media (max-width: 768px) {
+  .dashboard-header__meta {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.75rem 1.25rem;
+    padding-left: 0;
+    border-left: none;
+  }
+}
+
+/* Wallet balance badge (dashboard header) */
+
+.wallet-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: var(--color-ink-muted);
+}
+
+.wallet-badge__balance {
+  font-family: var(--font-ledger);
+  font-weight: 600;
+  color: var(--color-verdigris-deep);
+  white-space: nowrap;
+}
+
+.wallet-badge__address {
+  font-family: var(--font-ledger);
+  font-size: 0.7rem;
+  color: var(--color-ink-subtle);
+  background: var(--color-parchment-deep);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.15rem 0.4rem;
+  cursor: pointer;
+  max-width: 15ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wallet-badge__address:hover {
+  color: var(--color-ink);
+  border-color: var(--color-border-strong);
+}
+
+.wallet-badge__error {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.wallet-badge__nowallet {
+  color: var(--color-ink-subtle);
+  font-style: italic;
+}
+
+.wallet-badge__skeleton {
+  display: inline-block;
+  min-width: 9ch;
+  height: 1em;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--color-parchment-deep) 25%,
+    var(--color-parchment-elevated) 50%,
+    var(--color-parchment-deep) 75%
+  );
+  background-size: 200% 100%;
+  animation: wallet-badge-shimmer 1.2s linear infinite;
+}
+
+@keyframes wallet-badge-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.wallet-badge__refresh {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-parchment-elevated);
+  color: var(--color-ink-muted);
+  cursor: pointer;
+}
+
+.wallet-badge__refresh:hover {
+  color: var(--color-ink);
+  border-color: var(--color-border-strong);
+}
+
+.wallet-badge__refresh[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.wallet-badge__refresh-icon {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.wallet-badge__refresh-icon.is-spinning {
+  animation: wallet-badge-spin 0.8s linear infinite;
+}
+
+@keyframes wallet-badge-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Marketplace: insufficient balance warning */
+
+.result-card__insufficient {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--color-danger);
 }
 
 .dashboard-main {
@@ -1022,6 +1210,16 @@ img {
   transform: translateY(-1px);
 }
 
+.btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn[disabled]:hover {
+  transform: none;
+}
+
 .btn-primary {
   background: var(--color-verdigris);
   color: var(--color-parchment-elevated);
@@ -1040,19 +1238,6 @@ img {
 
 .btn-secondary:hover {
   background: rgba(238, 231, 219, 0.88);
-}
-
-.badge-info,
-.badge-success {
-  background: rgba(47, 86, 68, 0.12);
-  color: var(--color-verdigris-deep);
-  border-color: rgba(47, 86, 68, 0.2);
-}
-
-.badge-muted {
-  background: rgba(23, 20, 18, 0.05);
-  color: var(--color-ink-subtle);
-  border-color: rgba(23, 20, 18, 0.08);
 }
 
 @media (max-width: 1180px) {
@@ -1255,32 +1440,32 @@ img {
 
 .badge {
   display: inline-block;
-  padding: 0.2rem 0.55rem;
+  padding: 0.28rem 0.62rem;
   border-radius: var(--radius-sm);
   font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
   border: 1px solid transparent;
 }
 
 .badge-success {
-  background: var(--color-verdigris-muted);
-  color: var(--color-verdigris-deep);
-  border-color: rgba(61, 107, 92, 0.3);
+  background: var(--color-verdigris-deep);
+  color: var(--color-parchment-elevated);
+  border-color: var(--color-verdigris);
 }
 
 .badge-muted {
-  background: var(--color-parchment-deep);
-  color: var(--color-ink-subtle);
-  border-color: var(--color-border);
+  background: rgba(23, 20, 18, 0.55);
+  color: var(--color-parchment-elevated);
+  border-color: rgba(23, 20, 18, 0.75);
 }
 
 .badge-info {
-  background: rgba(184, 147, 95, 0.15);
-  color: var(--color-brass-deep);
-  border-color: rgba(184, 147, 95, 0.35);
+  background: var(--color-brass-deep);
+  color: var(--color-parchment-elevated);
+  border-color: var(--color-brass);
 }
 
 .badge-sm {
@@ -1367,6 +1552,15 @@ img {
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-top: 1rem;
+}
+
+.result-card__view-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-border-strong);
 }
 
 .btn {
@@ -1719,39 +1913,122 @@ img {
 /* Seller dashboard */
 
 .seller-dashboard {
+  width: 100%;
   max-width: 56rem;
+  margin: 0 auto;
 }
 
 .seller-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
+  overflow: hidden;
+  border: 1px solid rgba(47, 86, 68, 0.18);
+  border-radius: 1.5rem;
+  background: rgba(47, 86, 68, 0.07);
+  box-shadow: 0 18px 40px rgba(23, 20, 18, 0.06);
 }
 
 .seller-stat-card {
-  padding: 1.25rem;
+  padding: 1.3rem 1rem 1.15rem;
   text-align: center;
 }
 
-.seller-stat-value {
-  margin: 0.35rem 0 0;
-  font-family: var(--font-display);
-  font-size: 2rem;
+.seller-stat-card + .seller-stat-card {
+  border-left: 1px solid rgba(47, 86, 68, 0.16);
+}
+
+.seller-stat-card p.muted {
+  margin: 0;
+  font-size: 0.68rem;
   font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-ink-subtle);
+  text-wrap: balance;
+}
+
+.seller-stat-value {
+  margin: 0.45rem 0 0;
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
   color: var(--color-verdigris-deep);
 }
 
 .seller-section {
+  position: relative;
   display: grid;
   gap: 1rem;
+  padding-left: 1.1rem;
+  border-left: 3px solid var(--color-border);
+}
+
+.seller-section--properties {
+  border-left-color: var(--color-verdigris);
+}
+
+.seller-section--offers {
+  border-left-color: var(--color-brass);
+}
+
+.seller-section--escrows {
+  padding: 1.25rem;
+  border: 1px solid rgba(47, 86, 68, 0.16);
+  border-left: 5px solid var(--color-verdigris-deep);
+  border-radius: 1.5rem;
+  background: rgba(47, 86, 68, 0.06);
 }
 
 .seller-section h3 {
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
   font-family: var(--font-display);
-  font-size: 1.08rem;
+  font-size: 1.15rem;
   font-weight: 700;
   letter-spacing: -0.03em;
+}
+
+.seller-section h3::before {
+  content: '';
+  width: 0.55rem;
+  height: 0.55rem;
+  flex: none;
+  border-radius: 2px;
+  background: var(--color-verdigris);
+  transform: rotate(45deg);
+}
+
+.seller-section--offers h3::before {
+  background: var(--color-brass);
+}
+
+.seller-section--escrows h3::before {
+  background: var(--color-verdigris-deep);
+}
+
+.seller-section--escrows h3::after {
+  content: '';
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-left: 0.15rem;
+  flex: none;
+  border-radius: 50%;
+  background: var(--color-verdigris);
+  animation: seller-pulse 2s ease-in-out infinite;
+}
+
+@keyframes seller-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(47, 86, 68, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 0.45rem rgba(47, 86, 68, 0);
+  }
 }
 
 .seller-section__header {
@@ -1765,6 +2042,77 @@ img {
 .seller-section__hint {
   margin: 0;
   font-size: 0.9rem;
+}
+
+.seller-dashboard .result-card {
+  padding: 1.3rem 1.5rem;
+}
+
+.seller-dashboard .property-address {
+  font-size: 1.3rem;
+}
+
+.seller-dashboard .result-card__stats {
+  gap: 1.1rem;
+}
+
+.seller-dashboard .result-card__stats dd {
+  font-size: 0.92rem;
+}
+
+.seller-dashboard .result-card__stats dd:not(.stat-primary):not(.ledger-data) {
+  font-size: 0.85rem;
+  color: var(--color-ink-muted);
+}
+
+.stat-primary {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+}
+
+.contract-address {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  max-width: 100%;
+}
+
+.contract-address__value {
+  font-family: var(--font-ledger);
+  font-size: 0.8rem;
+  color: var(--color-ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.contract-address__copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  padding: 0;
+  flex: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-parchment-elevated);
+  color: var(--color-ink-muted);
+  cursor: pointer;
+}
+
+.contract-address__copy:hover {
+  color: var(--color-verdigris-deep);
+  border-color: var(--color-border-strong);
+}
+
+.contract-address__copy svg {
+  width: 0.8rem;
+  height: 0.8rem;
 }
 
 .seller-offer-card .offer-message,
@@ -1808,6 +2156,11 @@ img {
 
   .seller-stats {
     grid-template-columns: 1fr;
+  }
+
+  .seller-stat-card + .seller-stat-card {
+    border-left: none;
+    border-top: 1px solid rgba(47, 86, 68, 0.16);
   }
 }
 
@@ -1934,4 +2287,305 @@ img {
 
 .location-autocomplete__selection .btn-sm {
   margin-top: 0.5rem;
+}
+
+/* Hazard & land history (Land Insights) */
+
+.hazard-map-shell__heading h3 {
+  margin: 0;
+}
+
+.map-layers {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.map-layers--overlays {
+  padding: 0.6rem 1.15rem 0.75rem;
+}
+
+.map-layer-toggle {
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 999px;
+  background: var(--color-parchment-deep);
+  color: var(--color-ink-muted);
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.map-layer-toggle:hover {
+  border-color: var(--color-verdigris);
+  color: var(--color-verdigris-deep);
+}
+
+.map-layer-toggle.is-active {
+  background: var(--color-verdigris);
+  border-color: var(--color-verdigris-deep);
+  color: var(--color-parchment-elevated);
+}
+
+.map-layers__loading {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--color-ink-subtle);
+}
+
+.map-note {
+  margin: 0;
+  padding: 0.55rem 1.15rem 0.75rem;
+  font-size: 0.75rem;
+  color: var(--color-ink-subtle);
+}
+
+.map-note__error {
+  color: var(--color-danger);
+}
+
+.hazard-legend {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 1000;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-md);
+  background: rgba(255, 253, 249, 0.92);
+  border: 1px solid var(--color-border-strong);
+  box-shadow: 0 2px 8px rgba(23, 20, 18, 0.08);
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: var(--color-ink-muted);
+  min-width: 9rem;
+}
+
+.hazard-legend__title {
+  margin: 0.35rem 0 0.15rem;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.hazard-legend__title:first-child {
+  margin-top: 0;
+}
+
+.hazard-legend__row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.hazard-legend__swatch {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  flex: none;
+}
+
+.hazard-legend__swatch--halo {
+  box-shadow: 0 0 0 2px rgba(255, 253, 249, 0.85);
+}
+
+/* Land history panel */
+
+.land-history {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.land-history__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.land-history__header h3 {
+  margin: 0;
+}
+
+.land-history__meta {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--color-ink-subtle);
+}
+
+.land-history__section {
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--color-border-strong);
+}
+
+.land-history__section:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.land-history__section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.45rem;
+}
+
+.land-history__section-title h4 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.land-history__summary {
+  margin: 0 0 0.45rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-ink-muted);
+}
+
+.land-history__hint {
+  margin: 0 0 0.45rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--color-ink-subtle);
+}
+
+.land-history__list {
+  margin: 0.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.land-history__item {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.15rem 0.75rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: var(--radius-md);
+  background: rgba(47, 86, 68, 0.05);
+  border-left: 3px solid var(--color-verdigris);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.land-history__item-main strong {
+  color: var(--color-ink);
+}
+
+.land-history__item-meta {
+  color: var(--color-ink-subtle);
+  font-size: 0.75rem;
+}
+
+.philsa-details {
+  margin-top: 0.4rem;
+}
+
+.philsa-details summary {
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-verdigris-deep);
+}
+
+.philsa-query {
+  display: block;
+  margin: 0.5rem 0;
+  padding: 0.55rem 0.65rem;
+  border-radius: var(--radius-md);
+  background: var(--color-parchment-deep);
+  border: 1px solid var(--color-border-strong);
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  word-break: break-all;
+  color: var(--color-ink);
+}
+
+/* Risk badges */
+
+.risk-badge {
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-parchment-elevated);
+  white-space: nowrap;
+}
+
+.risk-badge--low {
+  background: var(--color-verdigris);
+}
+
+.risk-badge--moderate {
+  background: var(--color-brass);
+}
+
+.risk-badge--high {
+  background: #c05440;
+}
+
+.risk-badge--severe {
+  background: var(--color-danger);
+}
+
+/* Risk-adjusted valuation breakdown */
+
+.risk-breakdown {
+  margin-top: 0.9rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-border-strong);
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.risk-breakdown__row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.15rem 0.75rem;
+  font-size: 0.8125rem;
+}
+
+.risk-breakdown__label {
+  color: var(--color-ink-muted);
+}
+
+.risk-breakdown__detail {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.72rem;
+  color: var(--color-ink-subtle);
+}
+
+.risk-breakdown__delta {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .land-history__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hazard-legend {
+    position: static;
+    margin-top: 0.75rem;
+  }
 }

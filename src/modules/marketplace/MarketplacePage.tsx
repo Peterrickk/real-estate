@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { PropertyMap } from '../../components/PropertyMap';
 import { useAppData } from '../../context/AppDataContext';
 import { useToast } from '../../context/ToastContext';
+import { useWalletBalance } from '../../hooks/useWalletBalance';
 import { getEscrowDealForListing } from '../../data/storage';
 import {
   filterByLocation,
@@ -63,6 +65,7 @@ function toggleFilterValue(values: string[], value: string): string[] {
 export function MarketplacePage() {
   const { data, startEscrowFromBuy } = useAppData();
   const { showToast } = useToast();
+  const { balanceSat, noWallet } = useWalletBalance();
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [locationSelection, setLocationSelection] = useState<LocationSelection | null>(null);
   const [selectedStatusFilters, setSelectedStatusFilters] = useState<string[]>([
@@ -73,6 +76,13 @@ export function MarketplacePage() {
   ]);
   const [maxPrice, setMaxPrice] = useState(700_000);
   const [maxSize, setMaxSize] = useState(3_500);
+  // Demo BCH/USD rate used to compare the wallet balance (BCH) against the
+  // USD-denominated asking price. Adjust this to model a funded buyer.
+  const BCH_TO_USD_RATE = 100;
+  const balanceUsd = balanceSat !== null ? (balanceSat / 100_000_000) * BCH_TO_USD_RATE : null;
+  // Only gate the Buy button on balance when we actually know the balance
+  // (not while loading, on error, or when no wallet is connected).
+  const canAssessBalance = balanceSat !== null && !noWallet;
 
   const filteredListings = useMemo(
     () =>
@@ -240,6 +250,8 @@ export function MarketplacePage() {
             ) : (
               filteredListings.map((listing) => {
                 const escrow = getEscrowDealForListing(data, listing.id);
+                const sufficientFunds = canAssessBalance && balanceUsd! >= listing.askingPrice;
+                const insufficientFunds = canAssessBalance && !sufficientFunds;
 
                 return (
                   <article key={listing.id} className="card result-card">
@@ -284,10 +296,15 @@ export function MarketplacePage() {
                         type="button"
                         className="btn btn-primary"
                         onClick={() => handleBuy(listing)}
-                        disabled={Boolean(escrow)}
+                        disabled={Boolean(escrow) || insufficientFunds}
                       >
                         Buy
                       </button>
+                      {insufficientFunds && !escrow && (
+                        <p className="result-card__insufficient">
+                          Insufficient balance — you have {balanceUsd!.toFixed(2)} USD worth of BCH.
+                        </p>
+                      )}
                       <button
                         type="button"
                         className="btn btn-secondary"
@@ -295,6 +312,21 @@ export function MarketplacePage() {
                       >
                         Make Offer
                       </button>
+                    </div>
+
+                    <div className="result-card__view-actions">
+                      <Link
+                        className="btn btn-secondary btn-sm"
+                        to={`/history?property=${encodeURIComponent(listing.propertyId)}`}
+                      >
+                        View land ownership
+                      </Link>
+                      <Link
+                        className="btn btn-secondary btn-sm"
+                        to={`/insights?property=${encodeURIComponent(listing.propertyId)}`}
+                      >
+                        Land Insights
+                      </Link>
                     </div>
                   </article>
                 );
