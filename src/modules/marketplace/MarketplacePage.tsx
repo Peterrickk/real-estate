@@ -4,12 +4,14 @@ import { PropertyMap } from '../../components/PropertyMap';
 import { useAppData } from '../../context/AppDataContext';
 import { useToast } from '../../context/ToastContext';
 import { useWalletBalance } from '../../hooks/useWalletBalance';
+import { useDemoWallet } from '../../hooks/useDemoWallet';
 import { getEscrowDealForListing } from '../../data/storage';
 import {
   filterByLocation,
   toMapProperty,
   type LocationSelection,
 } from '../../lib/mapUtils';
+import { DEMO_BCH_USD_RATE } from '../../lib/rates';
 import type { EscrowDeal } from '../../lib/escrow/types';
 import { OfferModal } from './OfferModal';
 import type { Listing } from './types';
@@ -66,6 +68,7 @@ export function MarketplacePage() {
   const { data, startEscrowFromBuy } = useAppData();
   const { showToast } = useToast();
   const { balanceSat, noWallet } = useWalletBalance();
+  const buyerWallet = useDemoWallet();
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [locationSelection, setLocationSelection] = useState<LocationSelection | null>(null);
   const [selectedStatusFilters, setSelectedStatusFilters] = useState<string[]>([
@@ -78,8 +81,7 @@ export function MarketplacePage() {
   const [maxSize, setMaxSize] = useState(3_500);
   // Demo BCH/USD rate used to compare the wallet balance (BCH) against the
   // USD-denominated asking price. Adjust this to model a funded buyer.
-  const BCH_TO_USD_RATE = 100;
-  const balanceUsd = balanceSat !== null ? (balanceSat / 100_000_000) * BCH_TO_USD_RATE : null;
+  const balanceUsd = balanceSat !== null ? (balanceSat / 100_000_000) * DEMO_BCH_USD_RATE : null;
   // Only gate the Buy button on balance when we actually know the balance
   // (not while loading, on error, or when no wallet is connected).
   const canAssessBalance = balanceSat !== null && !noWallet;
@@ -143,9 +145,18 @@ export function MarketplacePage() {
   );
 
   const handleBuy = async (listing: Listing) => {
-    const deal = await startEscrowFromBuy(listing.id);
+    if (!buyerWallet) {
+      showToast('Connect a demo wallet to buy.', 'info');
+      return;
+    }
+
+    const deal = await startEscrowFromBuy(listing.id, buyerWallet.publicKey);
     if (deal) {
-      showToast(`Escrow started for ${listing.address}. Seller can manage it in Seller Dashboard.`);
+      showToast(
+        deal.status === 'funded'
+          ? `Escrow funded for ${listing.address}. Seller can manage it in Seller Dashboard.`
+          : `Escrow started for ${listing.address}. Seller can manage it in Seller Dashboard.`,
+      );
     } else {
       showToast('Unable to start escrow.', 'info');
     }

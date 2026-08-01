@@ -17,10 +17,16 @@ export interface EscrowDeal {
   id: string;
   propertyId: string;
   listingId: string;
-  /** Escrow contract address once deployed & funded — null while pending. */
+  /** PropertySaleEscrow contract (P2SH32) address once created — null while pending. */
   contractAddress: string | null;
-  /** Purchase amount held in escrow (USD for mock; satoshis when wired). */
+  /** Purchase amount held in escrow (USD — the app's display denomination). */
   amount: number;
+  /** Purchase amount in satoshis (`usdToSats(amount)` at the demo rate). */
+  amountSats: number;
+  /** Satoshis actually locked in the contract (amount + resolution fee buffer) — null until funded. */
+  fundedSats: number | null;
+  /** Mock funding transaction id that locked the escrow UTXO — null until funded. */
+  fundingTxId: string | null;
   parties: EscrowParties;
   status: EscrowStatus;
   /** Set when a resolution transaction is confirmed on-chain. */

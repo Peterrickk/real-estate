@@ -2,7 +2,9 @@ import type { EscrowDeal } from '../lib/escrow/types';
 import type { Listing, Offer } from '../modules/marketplace/types';
 import type { PriceHistoryPoint, ValuationSummary } from '../modules/land-insights/types';
 import type { TransferRecord } from '../modules/ownership-history/types';
+import type { FiatDeposit } from '../modules/funding/types';
 import type { Property } from '../modules/property-registry/types';
+import { DEMO_BUYER_PUBKEY, DEMO_SELLER_PUBKEY } from '../lib/ownerKeys';
 import { mockEscrowDeals } from './mockEscrowDeals';
 import {
   mockListings,
@@ -12,12 +14,15 @@ import {
   mockValuationSummaries,
 } from './mockProperties';
 
-export const STORAGE_KEY = 'bch-real-estate-data-v2';
+// Re-exported so existing callers keep importing from the data layer.
+export { DEMO_BUYER_PUBKEY, DEMO_SELLER_PUBKEY };
 
-export const DEMO_BUYER_PUBKEY = '02demo000000000000000000000000000000000001';
-
-/** Demo seller — owner of prop-001 in mock data. */
-export const DEMO_SELLER_PUBKEY = '02a1b2c3d4e5f6789012345678901234567890abcd';
+/**
+ * v3: escrow deals are now backed by the real PropertySaleEscrow contract and
+ * demo identities use the actual chipnet demo keypairs — stale v2 app data is
+ * intentionally discarded rather than migrated.
+ */
+export const STORAGE_KEY = 'bch-real-estate-data-v3';
 
 export interface AppData {
   properties: Property[];
@@ -27,6 +32,7 @@ export interface AppData {
   priceHistory: Record<string, PriceHistoryPoint[]>;
   valuationSummaries: Record<string, ValuationSummary>;
   offers: Offer[];
+  deposits: FiatDeposit[];
 }
 
 export function getDefaultAppData(): AppData {
@@ -38,6 +44,7 @@ export function getDefaultAppData(): AppData {
     priceHistory: structuredClone(mockPriceHistory),
     valuationSummaries: structuredClone(mockValuationSummaries),
     offers: [],
+    deposits: [],
   };
 }
 
@@ -68,6 +75,7 @@ export function loadAppData(): AppData {
       properties,
       offers: parsed.offers ?? defaults.offers,
       escrowDeals: parsed.escrowDeals ?? defaults.escrowDeals,
+      deposits: parsed.deposits ?? defaults.deposits,
     };
   } catch {
     return getDefaultAppData();

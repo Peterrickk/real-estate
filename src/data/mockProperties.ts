@@ -2,6 +2,7 @@ import type { Property } from '../modules/property-registry/types';
 import type { Listing } from '../modules/marketplace/types';
 import type { TransferRecord } from '../modules/ownership-history/types';
 import type { PriceHistoryPoint, ValuationSummary } from '../modules/land-insights/types';
+import { DEMO_SELLER_PUBKEY } from '../lib/ownerKeys';
 
 export const mockProperties: Property[] = [
   {
@@ -10,7 +11,7 @@ export const mockProperties: Property[] = [
     size: '2,400 sq ft',
     legalId: 'MIA-2024-00891',
     tokenId: 'BCH-RE-001',
-    ownerPubkey: '02a1b2c3d4e5f6789012345678901234567890abcd',
+    ownerPubkey: DEMO_SELLER_PUBKEY,
     listedPrice: null,
     dateTokenized: '2024-03-15',
     tokenized: true,
@@ -121,7 +122,7 @@ export const mockTransferHistory: Record<string, TransferRecord[]> = {
     {
       id: 'tx-001-a',
       propertyId: 'prop-001',
-      owner: '02a1b2c3d4e5f6789012345678901234567890abcd',
+      owner: DEMO_SELLER_PUBKEY,
       dateAcquired: '2024-03-15',
       dateSold: '2025-01-10',
       priceAtTime: 485_000,

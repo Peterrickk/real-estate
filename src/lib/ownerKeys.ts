@@ -16,6 +16,11 @@ export interface DemoWallet {
   privateKey: string;
 }
 
+export const DEFAULT_DEMO_EMAIL = 'avery@example.com';
+
+/** The platform-operated title company that arbitrates escrow resolutions. */
+export const TITLE_COMPANY_EMAIL = 'title@pacificescrow.com';
+
 export const DEMO_WALLETS: Record<string, DemoWallet> = {
   'avery@example.com': {
     email: 'avery@example.com',
@@ -41,7 +46,22 @@ export const DEMO_WALLETS: Record<string, DemoWallet> = {
     publicKey: '03388a49946f8f93823eeee41cf9923dcba51541a9821550da86825a9f89997d78',
     privateKey: 'c382da469f965d3a88d4f0027461a89459c2a60b080abcfe6d7c02bcefc126f5',
   },
+  [TITLE_COMPANY_EMAIL]: {
+    email: TITLE_COMPANY_EMAIL,
+    address: 'bchtest:qrsx6lnmurqm4zwy7s7fz3cueq2hch32056hgqwn4l',
+    publicKey: '03702070626882f3eceb1420f7b8f7c974f5e2c5474d1e41a39da9bc61be5faae9',
+    privateKey: '0c1a4b6af6834768a6d7dd9997de91c330b06c97e761e72e3458c923aa71ec00',
+  },
 };
+
+/**
+ * Demo buyer identity — the logged-in user's wallet when signed in, otherwise
+ * the default demo account (avery@example.com). Used for offers & purchases.
+ */
+export const DEMO_BUYER_PUBKEY = DEMO_WALLETS[DEFAULT_DEMO_EMAIL].publicKey;
+
+/** Demo seller identity — owner of the seeded prop-001 listing. */
+export const DEMO_SELLER_PUBKEY = DEMO_WALLETS['seller@example.com'].publicKey;
 
 /**
  * Resolve the demo wallet for a logged-in email.
@@ -53,4 +73,17 @@ export function getDemoWalletForEmail(email: string | null | undefined): DemoWal
   if (!email) return null;
   const key = email.trim().toLowerCase();
   return DEMO_WALLETS[key] ?? null;
+}
+
+/**
+ * Resolve the demo wallet for a hex public key (normalized case-insensitively).
+ * Used to look up signing keys / cashaddrs for escrow deal parties.
+ */
+export function findDemoWalletByPublicKey(publicKey: string | null | undefined): DemoWallet | null {
+  if (!publicKey) return null;
+  const normalized = publicKey.toLowerCase();
+  for (const wallet of Object.values(DEMO_WALLETS)) {
+    if (wallet.publicKey.toLowerCase() === normalized) return wallet;
+  }
+  return null;
 }

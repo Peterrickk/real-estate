@@ -1,6 +1,7 @@
 import type { FormEvent } from 'react';
 import { useAppData } from '../../context/AppDataContext';
 import { useToast } from '../../context/ToastContext';
+import { useDemoWallet } from '../../hooks/useDemoWallet';
 import type { Listing } from './types';
 
 interface OfferModalProps {
@@ -19,12 +20,18 @@ function formatPrice(price: number): string {
 export function OfferModal({ listing, onClose }: OfferModalProps) {
   const { addOffer } = useAppData();
   const { showToast } = useToast();
+  const buyerWallet = useDemoWallet();
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const offerAmount = Number(formData.get('offerAmount'));
     const message = String(formData.get('message') ?? '').trim();
+
+    if (!buyerWallet) {
+      showToast('Connect a demo wallet to make an offer.', 'info');
+      return;
+    }
 
     if (!Number.isFinite(offerAmount) || offerAmount <= 0) {
       showToast('Enter a valid offer amount.', 'info');
@@ -36,6 +43,7 @@ export function OfferModal({ listing, onClose }: OfferModalProps) {
       propertyId: listing.propertyId,
       offerAmount,
       message,
+      buyerPubkey: buyerWallet.publicKey,
     });
 
     showToast(`Offer submitted for ${listing.address}.`);

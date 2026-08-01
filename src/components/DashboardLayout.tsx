@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAppData } from '../context/AppDataContext';
 import { useToast } from '../context/ToastContext';
 import { WalletBalanceBadge } from '../components/WalletBalanceBadge';
+import { FundAccountModal } from '../modules/funding/FundAccountModal';
 
 const navItems = [
   { to: '/marketplace', label: 'Marketplace', icon: MarketIcon },
@@ -28,6 +30,16 @@ function SellerIcon() {
   );
 }
 
+function FundIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" strokeWidth="1.7" />
+      <path d="M12 7.5v9" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      <path d="M7.5 12h9" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function ResetIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -44,6 +56,7 @@ function ResetIcon() {
 export function DashboardLayout() {
   const { resetData } = useAppData();
   const { showToast } = useToast();
+  const [fundOpen, setFundOpen] = useState(false);
   const today = new Intl.DateTimeFormat('en-US', {
     weekday: 'long',
     month: 'long',
@@ -78,6 +91,15 @@ export function DashboardLayout() {
               <Icon />
             </NavLink>
           ))}
+          <button
+            type="button"
+            className="dashboard-sidebar__link"
+            onClick={() => setFundOpen(true)}
+            title="Buy BCH"
+            aria-label="Buy BCH"
+          >
+            <FundIcon />
+          </button>
         </nav>
         <button
           type="button"
@@ -106,6 +128,8 @@ export function DashboardLayout() {
           <Outlet />
         </main>
       </div>
+
+      {fundOpen && <FundAccountModal onClose={() => setFundOpen(false)} />}
     </div>
   );
 }

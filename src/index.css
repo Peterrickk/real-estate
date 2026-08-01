@@ -1660,6 +1660,154 @@ img {
   font-weight: 700;
 }
 
+/* Buy BCH (fund account) modal */
+
+.fund-modal {
+  max-width: 480px;
+}
+
+.fund-modal__balance {
+  margin: 0 0 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--color-ink-muted);
+}
+
+.fund-step {
+  margin-top: 0.75rem;
+}
+
+.fund-step__hint {
+  margin: 0 0 0.9rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--color-ink-subtle);
+}
+
+.fund-step__hint--note {
+  margin-top: 0.9rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-border-strong);
+}
+
+.fund-step .filter-field {
+  margin-bottom: 0.4rem;
+}
+
+.method-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.method-option {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-align: left;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-parchment-deep);
+  color: var(--color-ink);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease-out,
+    background-color 0.15s ease-out;
+}
+
+.method-option strong {
+  font-size: 0.875rem;
+}
+
+.method-option span {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--color-ink-subtle);
+}
+
+.method-option__meta {
+  margin-top: 0.15rem;
+  color: var(--color-verdigris-deep);
+  font-weight: 600;
+}
+
+.method-option:hover {
+  border-color: var(--color-verdigris);
+}
+
+.method-option.is-selected {
+  border-color: var(--color-verdigris-deep);
+  background: var(--color-verdigris-muted);
+  box-shadow: 0 0 0 1px var(--color-verdigris-deep);
+}
+
+.purchase-preview {
+  display: flex;
+  flex-direction: column;
+  margin: 0.9rem 0 0.5rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.purchase-preview__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--color-ink-muted);
+  border-bottom: 1px solid var(--color-border-strong);
+}
+
+.purchase-preview__row:last-child {
+  border-bottom: 0;
+}
+
+.purchase-preview__row--total {
+  background: var(--color-verdigris-muted);
+  color: var(--color-ink);
+  font-weight: 700;
+}
+
+.purchase-preview__row--total strong {
+  color: var(--color-verdigris-deep);
+}
+
+.fund-success {
+  text-align: center;
+  padding: 0.5rem 0 0.25rem;
+}
+
+.fund-success__amount {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-verdigris-deep);
+}
+
+.fund-success__title {
+  margin: 0.15rem 0 0.75rem;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.fund-success .button-row {
+  justify-content: center;
+}
+
+@media (max-width: 480px) {
+  .method-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .offer-form {
   display: flex;
   flex-direction: column;

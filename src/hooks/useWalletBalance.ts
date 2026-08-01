@@ -1,33 +1,44 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ElectrumNetworkProvider } from 'cashscript';
+import { useAppData } from '../context/AppDataContext';
 import { useAuth } from '../context/AuthContext';
-import { getDemoWalletForEmail } from '../lib/ownerKeys';
+import { getDemoWalletForEmail, DEFAULT_DEMO_EMAIL } from '../lib/ownerKeys';
 
 const POLL_INTERVAL_MS = 30_000;
 
 /**
- * The demo app has no real onboarding flow, so with no logged-in session we
- * fall back to the default Avery demo wallet. Otherwise we use the email
- * recorded at login (buyer or seller) to resolve that user's demo keypair.
- */
-const DEFAULT_DEMO_EMAIL = 'avery@example.com';
-
-/**
- * Real BCH balance (chipnet) for the current user's demo wallet.
+ * Wallet balance for the current user's demo wallet.
  *
- * Resolves the user's demo address from `ownerKeys.ts`, queries UTXOs via the
- * same `ElectrumNetworkProvider('chipnet')` used by the escrow service, and
- * polls every 30 seconds.
+ * = on-chain chipnet UTXOs (queried via the same `ElectrumNetworkProvider`
+ *   used by the escrow service) + completed fiat purchases recorded in the
+ *   app data layer. Credits are stored in exact satoshis.
  */
 export function useWalletBalance() {
   const { user } = useAuth();
+  const { data } = useAppData();
   const email = user?.email ?? DEFAULT_DEMO_EMAIL;
   const wallet = getDemoWalletForEmail(email);
   const address = wallet?.address ?? null;
 
-  const [balanceSat, setBalanceSat] = useState<number | null>(null);
+  const [onChainSat, setOnChainSat] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(address !== null);
   const [error, setError] = useState<string | null>(null);
+
+  // Completed fiat purchases credited to this user (app-data layer). Uses the
+  // unspent remainder so escrow fundings reduce the available balance.
+  const fundedSats = useMemo(
+    () =>
+      data.deposits.reduce(
+        (sum, deposit) =>
+          deposit.email === email && deposit.status === 'completed'
+            ? sum + deposit.remainingSats
+            : sum,
+        0,
+      ),
+    [data.deposits, email],
+  );
+
+  const balanceSat = onChainSat !== null ? onChainSat + fundedSats : null;
 
   const providerRef = useRef<ElectrumNetworkProvider | null>(null);
   const activeRef = useRef(false);
@@ -38,7 +49,7 @@ export function useWalletBalance() {
   const [resolvedAddress, setResolvedAddress] = useState(address);
   if (resolvedAddress !== address) {
     setResolvedAddress(address);
-    setBalanceSat(null);
+    setOnChainSat(null);
     setError(null);
     setIsLoading(address !== null);
   }
@@ -55,7 +66,7 @@ export function useWalletBalance() {
       if (!activeRef.current) return; // stale response
 
       const totalSat = utxos.reduce((sum, utxo) => sum + utxo.satoshis, 0n);
-      setBalanceSat(Number(totalSat));
+      setOnChainSat(Number(totalSat));
       setError(null);
     } catch (err) {
       if (!activeRef.current) return;
@@ -84,10 +95,12 @@ export function useWalletBalance() {
   return {
     /** Chipnet cashaddr for the current user, or null when no demo keypair exists. */
     address,
-    /** Balance in satoshis, or null while loading / on error / no wallet. */
+    /** Balance in satoshis (on-chain + funded), or null while loading / on error / no wallet. */
     balanceSat,
     /** Balance in BCH (satoshis / 100_000_000), or null. */
     balance: balanceSat !== null ? balanceSat / 100_000_000 : null,
+    /** On-chain chipnet portion only, in satoshis. */
+    onChainSat,
     isLoading,
     error,
     /** True when the logged-in email has no demo keypair yet. */

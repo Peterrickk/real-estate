@@ -12,7 +12,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "compile:contract": "cashc contracts/PropertySaleEscrow.cash -o artifacts/PropertySaleEscrow.json",
-    "demo:PropertySaleEscrow": "npx ts-node demos/PropertySaleEscrow.ts"
+    "demo:PropertySaleEscrow": "node demos/PropertySaleEscrow.ts",
+    "test:escrow": "vite build --ssr demos/escrow-service-test.ts --outDir .ssr-test && node .ssr-test/escrow-service-test.js"
   },
   "dependencies": {
     "cashscript": "^0.13.2",

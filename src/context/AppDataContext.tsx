@@ -8,7 +8,6 @@ import {
   type ReactNode,
 } from 'react';
 import {
-  DEMO_BUYER_PUBKEY,
   DEMO_SELLER_PUBKEY,
   getPropertyById,
   loadAppData,
@@ -16,9 +15,10 @@ import {
   saveAppData,
   type AppData,
 } from '../data/storage';
-import { TITLE_COMPANY_ARBITER } from '../lib/escrow/constants';
-import { completeSale, createEscrowDeal, mutualClose } from '../lib/escrow';
+import { completeSale, createEscrowDeal, fundEscrow, mutualClose } from '../lib/escrow';
 import type { EscrowDeal } from '../lib/escrow/types';
+import { DEMO_BCH_USD_RATE, FUNDING_METHODS } from '../lib/rates';
+import type { FiatDeposit } from '../modules/funding/types';
 import type { Listing, Offer } from '../modules/marketplace/types';
 
 interface SubmitOfferInput {
@@ -26,6 +26,17 @@ interface SubmitOfferInput {
   propertyId: string;
   offerAmount: number;
   message: string;
+  /** Buyer's chipnet pubkey — the escrow contract embeds this exact key. */
+  buyerPubkey: string;
+}
+
+interface AddDepositInput {
+  email: string;
+  method: 'bank' | 'card';
+  fiatAmount: number;
+  grossSats: number;
+  feeSats: number;
+  creditedSats: number;
 }
 
 type OfferResponse = 'accepted' | 'rejected';
@@ -33,7 +44,8 @@ type OfferResponse = 'accepted' | 'rejected';
 interface AppDataContextValue {
   data: AppData;
   addOffer: (input: SubmitOfferInput) => Offer;
-  startEscrowFromBuy: (listingId: string) => Promise<EscrowDeal | null>;
+  addDeposit: (input: AddDepositInput) => FiatDeposit;
+  startEscrowFromBuy: (listingId: string, buyerPubkey: string) => Promise<EscrowDeal | null>;
   getSellerProperties: () => import('../modules/property-registry/types').Property[];
   getSellerListings: () => Listing[];
   getSellerOffers: () => Offer[];
@@ -57,6 +69,10 @@ const ACTIVE_ESCROW_STATUSES: EscrowDeal['status'][] = [
 
 function createOfferId(): string {
   return `offer-${Date.now()}`;
+}
+
+function createDepositId(): string {
+  return `dep-${Date.now()}`;
 }
 
 function todayIsoDate(): string {
@@ -127,26 +143,6 @@ function applyEscrowCompletion(current: AppData, resolvedDeal: EscrowDeal): AppD
   };
 }
 
-function buildEscrowFromOffer(listing: Listing, offer: Offer): EscrowDeal {
-  return {
-    id: `escrow-${listing.id}-${Date.now()}`,
-    propertyId: listing.propertyId,
-    listingId: listing.id,
-    contractAddress: null,
-    amount: offer.offerAmount,
-    parties: {
-      buyerPubkey: offer.buyerPubkey,
-      sellerPubkey: listing.sellerPubkey,
-      ...TITLE_COMPANY_ARBITER,
-    },
-    status: 'pending_funding',
-    resolution: null,
-    createdAt: new Date().toISOString(),
-    resolvedAt: null,
-    resolutionTxId: null,
-  };
-}
-
 export function AppDataProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<AppData>(() => loadAppData());
 
@@ -154,13 +150,42 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     saveAppData(data);
   }, [data]);
 
+  // Advance "processing" deposits to "completed" once their (simulated)
+  // funding delay elapses — bank transfers take ~30s in the demo, cards
+  // are credited instantly at creation.
+  useEffect(() => {
+    const timers: number[] = [];
+
+    for (const deposit of data.deposits) {
+      if (deposit.status !== 'processing') continue;
+      const delayMs = FUNDING_METHODS[deposit.method].processingDelayMs;
+      if (delayMs === null) continue;
+
+      const elapsed = Date.now() - new Date(deposit.createdAt).getTime();
+      const remaining = Math.max(0, delayMs - elapsed);
+      const timerId = window.setTimeout(() => {
+        setData((current) => ({
+          ...current,
+          deposits: current.deposits.map((item) =>
+            item.id === deposit.id
+              ? { ...item, status: 'completed' as const, completedAt: new Date().toISOString() }
+              : item,
+          ),
+        }));
+      }, remaining);
+      timers.push(timerId);
+    }
+
+    return () => timers.forEach((id) => window.clearTimeout(id));
+  }, [data.deposits]);
+
   const addOffer = useCallback((input: SubmitOfferInput): Offer => {
     const offer: Offer = {
       id: createOfferId(),
       listingId: input.listingId,
       propertyId: input.propertyId,
       offerAmount: input.offerAmount,
-      buyerPubkey: DEMO_BUYER_PUBKEY,
+      buyerPubkey: input.buyerPubkey,
       message: input.message,
       createdAt: new Date().toISOString(),
       status: 'pending',
@@ -174,45 +199,65 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     return offer;
   }, []);
 
-  const startEscrowFromBuy = useCallback(async (listingId: string): Promise<EscrowDeal | null> => {
-    const current = data;
-    const listing = current.listings.find((item) => item.id === listingId);
-    if (!listing) return null;
-
-    const existing = current.escrowDeals.find(
-      (deal) => deal.listingId === listingId && ACTIVE_ESCROW_STATUSES.includes(deal.status),
-    );
-    if (existing) return existing;
-
-    const deal: EscrowDeal = {
-      id: `escrow-${listing.id}-${Date.now()}`,
-      propertyId: listing.propertyId,
-      listingId: listing.id,
-      contractAddress: null,
-      amount: listing.askingPrice,
-      parties: {
-        buyerPubkey: DEMO_BUYER_PUBKEY,
-        sellerPubkey: listing.sellerPubkey,
-        ...TITLE_COMPANY_ARBITER,
-      },
-      status: 'pending_funding',
-      resolution: null,
-      createdAt: new Date().toISOString(),
-      resolvedAt: null,
-      resolutionTxId: null,
+  const addDeposit = useCallback((input: AddDepositInput): FiatDeposit => {
+    const instant = FUNDING_METHODS[input.method].processingDelayMs === null;
+    const now = new Date().toISOString();
+    const deposit: FiatDeposit = {
+      id: createDepositId(),
+      email: input.email,
+      method: input.method,
+      fiatAmount: input.fiatAmount,
+      fiatCurrency: 'USD',
+      grossSats: input.grossSats,
+      feeSats: input.feeSats,
+      creditedSats: input.creditedSats,
+      remainingSats: input.creditedSats,
+      rateBchPerUsd: DEMO_BCH_USD_RATE,
+      status: instant ? 'completed' : 'processing',
+      createdAt: now,
+      completedAt: instant ? now : null,
     };
 
-    setData((prev) => ({
-      ...prev,
-      escrowDeals: [deal, ...prev.escrowDeals],
-      listings: prev.listings.map((item) =>
-        item.id === listingId ? { ...item, escrowId: deal.id } : item,
-      ),
+    setData((current) => ({
+      ...current,
+      deposits: [deposit, ...current.deposits],
     }));
 
-    await createEscrowDeal(listing, DEMO_BUYER_PUBKEY);
-    return deal;
-  }, [data]);
+    return deposit;
+  }, []);
+
+  const startEscrowFromBuy = useCallback(
+    async (listingId: string, buyerPubkey: string): Promise<EscrowDeal | null> => {
+      const current = data;
+      const listing = current.listings.find((item) => item.id === listingId);
+      if (!listing) return null;
+
+      const existing = current.escrowDeals.find(
+        (deal) => deal.listingId === listingId && ACTIVE_ESCROW_STATUSES.includes(deal.status),
+      );
+      if (existing) return existing;
+
+      // Deploy the PropertySaleEscrow contract for this deal (address derived
+      // from the artifact + the parties' pubkeys; no broadcast needed).
+      const deal = await createEscrowDeal(listing, buyerPubkey);
+
+      // Fund the escrow from the buyer's completed deposits when possible.
+      const funded = await fundEscrow(data, deal);
+      const persistedDeal = funded?.deal ?? deal;
+
+      setData((prev) => ({
+        ...prev,
+        escrowDeals: [persistedDeal, ...prev.escrowDeals],
+        deposits: funded?.deposits ?? prev.deposits,
+        listings: prev.listings.map((item) =>
+          item.id === listingId ? { ...item, escrowId: persistedDeal.id } : item,
+        ),
+      }));
+
+      return persistedDeal;
+    },
+    [data],
+  );
 
   const getSellerProperties = useCallback(
     () => data.properties.filter((property) => property.ownerPubkey === DEMO_SELLER_PUBKEY),
@@ -338,38 +383,45 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         return rejected;
       }
 
+      const current = data;
+      const offer = current.offers.find((item) => item.id === offerId);
+      if (!offer || offer.status !== 'pending') return false;
+
+      const listing = current.listings.find((item) => item.id === offer.listingId);
+      if (!listing || listing.sellerPubkey !== DEMO_SELLER_PUBKEY) return false;
+
+      const existingEscrow = current.escrowDeals.find(
+        (deal) => deal.listingId === listing.id && ACTIVE_ESCROW_STATUSES.includes(deal.status),
+      );
+      if (existingEscrow) return false;
+
+      // Deploy the contract for the agreed price, then fund from the buyer's
+      // completed deposits when possible.
+      const deal = await createEscrowDeal(listing, offer.buyerPubkey, offer.offerAmount);
+      const funded = await fundEscrow(data, deal);
+      const persistedDeal = funded?.deal ?? deal;
+
       let accepted = false;
-
-      setData((current) => {
-        const offer = current.offers.find((item) => item.id === offerId);
-        if (!offer || offer.status !== 'pending') return current;
-
-        const listing = current.listings.find((item) => item.id === offer.listingId);
-        if (!listing || listing.sellerPubkey !== DEMO_SELLER_PUBKEY) return current;
-
-        const existingEscrow = current.escrowDeals.find(
-          (deal) => deal.listingId === listing.id && ACTIVE_ESCROW_STATUSES.includes(deal.status),
-        );
-        if (existingEscrow) return current;
-
+      setData((prev) => {
+        const currentOffer = prev.offers.find((item) => item.id === offerId);
+        if (!currentOffer || currentOffer.status !== 'pending') return prev;
         accepted = true;
-        const deal = buildEscrowFromOffer(listing, offer);
-
         return {
-          ...current,
-          offers: current.offers.map((item) =>
+          ...prev,
+          offers: prev.offers.map((item) =>
             item.id === offerId ? { ...item, status: 'accepted' } : item,
           ),
-          escrowDeals: [deal, ...current.escrowDeals],
-          listings: current.listings.map((item) =>
-            item.id === listing.id ? { ...item, escrowId: deal.id } : item,
+          escrowDeals: [persistedDeal, ...prev.escrowDeals],
+          deposits: funded?.deposits ?? prev.deposits,
+          listings: prev.listings.map((item) =>
+            item.id === listing.id ? { ...item, escrowId: persistedDeal.id } : item,
           ),
         };
       });
 
       return accepted;
     },
-    [],
+    [data],
   );
 
   const resolveEscrow = useCallback(
@@ -380,8 +432,12 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       if (action === 'completeSale' && deal.status !== 'awaiting_title_clearance') return false;
       if (action === 'mutualClose' && deal.status !== 'funded') return false;
 
+      // Broadcast the resolution transaction against the contract.
       const resolvedDeal =
-        action === 'completeSale' ? await completeSale(deal) : await mutualClose(deal);
+        action === 'completeSale'
+          ? await completeSale(data, deal)
+          : await mutualClose(data, deal);
+      if (!resolvedDeal) return false;
 
       let resolved = false;
       setData((current) => {
@@ -393,7 +449,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
 
       return resolved;
     },
-    [data.escrowDeals],
+    [data],
   );
 
   const resetData = useCallback(() => {
@@ -404,6 +460,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     () => ({
       data,
       addOffer,
+      addDeposit,
       startEscrowFromBuy,
       getSellerProperties,
       getSellerListings,
@@ -420,6 +477,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     [
       data,
       addOffer,
+      addDeposit,
       startEscrowFromBuy,
       getSellerProperties,
       getSellerListings,
