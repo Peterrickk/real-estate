@@ -38,9 +38,7 @@ export function OwnershipHistoryPage() {
   return (
     <section className="dashboard-page">
       <header className="page-intro">
-        <p className="section-heading__eyebrow">Operations view</p>
         <h2>Ownership History</h2>
-        <p>Chain-of-custody records for tokenized properties, filtered by source and asset.</p>
       </header>
 
       <div className="dashboard-grid">
@@ -90,9 +88,6 @@ export function OwnershipHistoryPage() {
         <div className="results-panel">
           <div className="results-panel__header">
             <h3>{records.length} transfer records</h3>
-            <p className="muted">
-              {selectedProperty?.address ?? 'Select a property'} · history filtered by source tags.
-            </p>
           </div>
 
           <div className="transfer-list">
@@ -107,7 +102,6 @@ export function OwnershipHistoryPage() {
         <div className="map-panel">
           <ResultMap
             title="Tokenized portfolio"
-            description="The highlighted property stays in view while the wider tokenized set remains visible."
             items={mapItems}
           />
         </div>

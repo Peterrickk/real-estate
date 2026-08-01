@@ -90,11 +90,12 @@ export function PropertyRegistryPage() {
           <span>Price Range</span>
           <strong>{formatPrice(maxPrice)}</strong>
           <input
-            type="range"
+            type="number"
             min="350000"
             max="700000"
             step="5000"
             value={maxPrice}
+            inputMode="numeric"
             onChange={(event) => setMaxPrice(Number(event.target.value))}
           />
         </label>
@@ -102,11 +103,12 @@ export function PropertyRegistryPage() {
           <span>Size</span>
           <strong>{maxSize.toLocaleString()} sq ft</strong>
           <input
-            type="range"
+            type="number"
             min="1500"
             max="4000"
             step="50"
             value={maxSize}
+            inputMode="numeric"
             onChange={(event) => setMaxSize(Number(event.target.value))}
           />
         </label>

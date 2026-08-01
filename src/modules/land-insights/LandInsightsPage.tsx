@@ -7,7 +7,7 @@ import { ValuationSummaryCard } from './ValuationSummaryCard';
 const sourceFilters = [
   { value: 'appraisal', label: 'Appraisal points' },
   { value: 'escrow', label: 'Escrow-fed points' },
-]
+];
 
 function toggleFilterValue(values: string[], value: string): string[] {
   return values.includes(value) ? values.filter((item) => item !== value) : [...values, value];
@@ -40,9 +40,7 @@ export function LandInsightsPage() {
   return (
     <section className="dashboard-page">
       <header className="page-intro">
-        <p className="section-heading__eyebrow">Operations view</p>
         <h2>Land Insights</h2>
-        <p>Valuation context, price history, and a live property map in one working surface.</p>
       </header>
 
       <div className="dashboard-grid">
@@ -96,7 +94,6 @@ export function LandInsightsPage() {
         <div className="results-panel results-panel--insights">
           <div className="results-panel__header">
             <h3>{selectedProperty?.address ?? 'Selected property'}</h3>
-            <p className="muted">Historical pricing and valuation for the active asset.</p>
           </div>
 
           <div className="insights-stack">
@@ -111,7 +108,6 @@ export function LandInsightsPage() {
         <div className="map-panel">
           <ResultMap
             title="Tokenized portfolio"
-            description="Use the map to orient the selected asset against the rest of the portfolio."
             items={mapItems}
           />
         </div>

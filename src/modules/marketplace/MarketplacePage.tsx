@@ -134,12 +134,7 @@ export function MarketplacePage() {
   return (
     <section className="dashboard-page">
       <header className="page-intro">
-        <p className="section-heading__eyebrow">Operations view</p>
         <h2>Marketplace</h2>
-        <p>
-          Filter the live inventory, review active escrow, and track every listing against its map
-          position.
-        </p>
       </header>
 
       <div className="dashboard-grid">
@@ -179,11 +174,12 @@ export function MarketplacePage() {
             <span>Price Range</span>
             <strong>{formatPrice(maxPrice)}</strong>
             <input
-              type="range"
+              type="number"
               min="350000"
               max="700000"
               step="5000"
               value={maxPrice}
+              inputMode="numeric"
               onChange={(event) => setMaxPrice(Number(event.target.value))}
             />
           </label>
@@ -192,11 +188,12 @@ export function MarketplacePage() {
             <span>Size</span>
             <strong>{maxSize.toLocaleString()} sq ft</strong>
             <input
-              type="range"
+              type="number"
               min="1500"
               max="4000"
               step="50"
               value={maxSize}
+              inputMode="numeric"
               onChange={(event) => setMaxSize(Number(event.target.value))}
             />
           </label>
@@ -205,7 +202,6 @@ export function MarketplacePage() {
         <div className="results-panel">
           <div className="results-panel__header">
             <h3>{filteredListings.length} active listings</h3>
-            <p className="muted">Dense operating view with price, location, and escrow context.</p>
           </div>
 
           <div className="results-stack">
@@ -303,7 +299,6 @@ export function MarketplacePage() {
         <div className="map-panel">
           <ResultMap
             title="Listing distribution"
-            description="Pins update as filters change so the inventory remains spatially legible."
             items={mapItems}
           />
         </div>

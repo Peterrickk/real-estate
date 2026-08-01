@@ -543,20 +543,37 @@ img {
 }
 
 .hero-search__field select,
-.hero-search__field input[type='range'],
+.hero-search__field input[type='number'],
 .filter-field select,
-.filter-field input[type='range'] {
+.filter-field input[type='number'] {
   width: 100%;
 }
 
 .hero-search__field select,
-.filter-field select {
+.filter-field select,
+.hero-search__field input[type='number'],
+.filter-field input[type='number'] {
   border: none;
   background: transparent;
   color: var(--color-ink);
   font: inherit;
   padding: 0;
   min-width: 0;
+}
+
+.hero-search__field input[type='number'],
+.filter-field input[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+  text-align: left;
+}
+
+.hero-search__field input[type='number']::-webkit-outer-spin-button,
+.hero-search__field input[type='number']::-webkit-inner-spin-button,
+.filter-field input[type='number']::-webkit-outer-spin-button,
+.filter-field input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .hero-search__field strong,
