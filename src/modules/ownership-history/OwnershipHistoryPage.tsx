@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
-import { ResultMap } from '../../components/ResultMap';
+import { PropertyMap } from '../../components/PropertyMap';
 import { useAppData } from '../../context/AppDataContext';
+import { filterByLocation, toMapProperty, type LocationSelection, uniqueLocations, getLocationFromAddress } from '../../lib/mapUtils';
 import { TransferRecordRow } from './TransferRecord';
 
 const sourceFilters = [
@@ -16,7 +17,27 @@ export function OwnershipHistoryPage() {
   const { data } = useAppData();
   const tokenizedProperties = data.properties.filter((property) => property.tokenized);
   const [selectedPropertyId, setSelectedPropertyId] = useState(tokenizedProperties[0]?.id ?? '');
+  const [locationSelection, setLocationSelection] = useState<LocationSelection | null>(null);
   const [selectedSources, setSelectedSources] = useState<string[]>(['registry', 'escrow']);
+
+  // Get location options from tokenized properties
+  const locationOptions = useMemo(() => {
+    const locations = tokenizedProperties.map(prop => ({
+      address: prop.address,
+      lat: prop.lat,
+      lng: prop.lng
+    }));
+    // Add "All Locations" option at the beginning
+    return [
+      { address: 'All Locations', lat: 0, lng: 0 }, // This will be handled specially
+      ...locations
+    ];
+  }, [tokenizedProperties]);
+
+  const locationFilteredProperties = useMemo(
+    () => filterByLocation(tokenizedProperties, locationSelection),
+    [tokenizedProperties, locationSelection],
+  );
 
   const selectedProperty = data.properties.find((property) => property.id === selectedPropertyId);
 
@@ -28,12 +49,13 @@ export function OwnershipHistoryPage() {
     });
   }, [data.transferHistory, selectedPropertyId, selectedSources]);
 
-  const mapItems = tokenizedProperties.map((property) => ({
-    id: property.id,
-    title: property.address,
-    subtitle: property.tokenId || property.legalId,
-    highlighted: property.id === selectedPropertyId,
-  }));
+  const ownedTokens = useMemo(
+    () =>
+      locationFilteredProperties.map((property) =>
+        toMapProperty(property, property.tokenId || property.legalId),
+      ),
+    [locationFilteredProperties],
+  );
 
   return (
     <section className="dashboard-page">
@@ -44,6 +66,34 @@ export function OwnershipHistoryPage() {
       <div className="dashboard-grid">
         <aside className="filters-panel card">
           <h3>Filters</h3>
+          <label className="filter-field">
+            <span>Location</span>
+            <select
+              id="ownership-location"
+              value={locationSelection?.address || 'All Locations'}
+              onChange={(e) => {
+                const selectedValue = e.target.value;
+                if (selectedValue === 'All Locations') {
+                  setLocationSelection(null);
+                } else {
+                  const selectedLocation = locationOptions.find(
+                    loc => loc.address === selectedValue
+                  );
+                  setLocationSelection(selectedLocation || null);
+                }
+              }}
+            >
+              <option value="All Locations">All Locations</option>
+              {locationOptions
+                .filter(opt => opt.address !== 'All Locations')
+                .map(option => (
+                  <option key={option.address} value={option.address}>
+                    {option.address}
+                  </option>
+                ))}
+            </select>
+          </label>
+
           <label className="filter-field">
             <span>Property</span>
             <select
@@ -100,9 +150,11 @@ export function OwnershipHistoryPage() {
         </div>
 
         <div className="map-panel">
-          <ResultMap
+          <PropertyMap
             title="Tokenized portfolio"
-            items={mapItems}
+            properties={ownedTokens}
+            center={locationSelection ?? undefined}
+            highlightedId={selectedPropertyId}
           />
         </div>
       </div>

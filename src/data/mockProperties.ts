@@ -14,6 +14,8 @@ export const mockProperties: Property[] = [
     listedPrice: null,
     dateTokenized: '2024-03-15',
     tokenized: true,
+    lat: 25.7781,
+    lng: -80.2197,
   },
   {
     id: 'prop-002',
@@ -25,6 +27,8 @@ export const mockProperties: Property[] = [
     listedPrice: 620_000,
     dateTokenized: '2023-11-02',
     tokenized: true,
+    lat: 30.2672,
+    lng: -97.7431,
   },
   {
     id: 'prop-003',
@@ -36,6 +40,8 @@ export const mockProperties: Property[] = [
     listedPrice: null,
     dateTokenized: '2024-06-20',
     tokenized: true,
+    lat: 33.5722,
+    lng: -112.0892,
   },
   {
     id: 'prop-004',
@@ -47,6 +53,8 @@ export const mockProperties: Property[] = [
     listedPrice: null,
     dateTokenized: '',
     tokenized: false,
+    lat: 39.7392,
+    lng: -104.9903,
   },
 ];
 

@@ -48,9 +48,16 @@ export function loadAppData(): AppData {
 
     const defaults = getDefaultAppData();
     const parsed = JSON.parse(raw) as Partial<AppData>;
+
+    const properties = (parsed.properties ?? defaults.properties).map((property) => {
+      const fallback = defaults.properties.find((item) => item.id === property.id);
+      return fallback ? { ...fallback, ...property, lat: property.lat ?? fallback.lat, lng: property.lng ?? fallback.lng } : property;
+    });
+
     return {
       ...defaults,
       ...parsed,
+      properties,
       offers: parsed.offers ?? defaults.offers,
       escrowDeals: parsed.escrowDeals ?? defaults.escrowDeals,
     };

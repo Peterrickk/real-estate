@@ -1,3 +1,5 @@
+@import "leaflet/dist/leaflet.css";
+
 :root {
   --color-parchment: #f7f5f1;
   --color-parchment-deep: #ece5db;
@@ -1804,4 +1806,119 @@ img {
   .stat-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Maps — PropertyMap + LocationAutocomplete */
+
+.property-map-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 360px;
+  overflow: hidden;
+}
+
+.property-map-shell__header {
+  padding: 1rem 1.15rem 0.75rem;
+}
+
+.property-map {
+  position: relative;
+  flex: 1;
+  min-height: 320px;
+  border-top: 1px solid var(--color-border-strong);
+}
+
+.property-map__empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  text-align: center;
+}
+
+.property-map--unconfigured,
+.property-map--loading,
+.property-map--error {
+  display: grid;
+  place-items: center;
+  min-height: 320px;
+  padding: 1.5rem;
+  border-top: 1px solid var(--color-border-strong);
+  background: linear-gradient(180deg, rgba(240, 235, 224, 0.45), rgba(255, 253, 249, 0.9));
+}
+
+.property-map--unconfigured {
+  border-left: 4px solid var(--color-brass);
+}
+
+.property-map--error {
+  border-left: 4px solid var(--color-danger);
+}
+
+.property-map__status {
+  max-width: 28rem;
+  text-align: center;
+}
+
+.property-map__status-title {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.property-map__status-body {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-ink-muted);
+  line-height: 1.55;
+}
+
+.property-map__status-body code {
+  font-size: 0.8125rem;
+}
+
+.location-autocomplete {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  font: inherit;
+  background: var(--color-parchment-elevated);
+  color: var(--color-ink);
+}
+
+.location-autocomplete:focus-visible {
+  outline: 2px solid var(--color-verdigris);
+  outline-offset: 1px;
+  border-color: var(--color-verdigris);
+}
+
+.location-autocomplete--disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
+  background: var(--color-parchment-deep);
+}
+
+.location-autocomplete__hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.75rem;
+}
+
+.location-autocomplete__selection {
+  margin-top: 0.65rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius-md);
+  background: rgba(47, 86, 68, 0.06);
+  border: 1px solid rgba(47, 86, 68, 0.12);
+}
+
+.location-autocomplete__selection p {
+  margin: 0.15rem 0;
+}
+
+.location-autocomplete__selection .btn-sm {
+  margin-top: 0.5rem;
 }

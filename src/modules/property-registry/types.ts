@@ -8,4 +8,6 @@ export interface Property {
   listedPrice: number | null;
   dateTokenized: string;
   tokenized: boolean;
+  lat: number;
+  lng: number;
 }

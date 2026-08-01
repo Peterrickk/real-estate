@@ -1,8 +1,16 @@
 import { useMemo, useState } from 'react';
-import { ResultMap } from '../../components/ResultMap';
+import { LocationAutocomplete } from '../../components/LocationAutocomplete';
+import { PropertyMap } from '../../components/PropertyMap';
 import { useAppData } from '../../context/AppDataContext';
 import { useToast } from '../../context/ToastContext';
 import { getEscrowDealForListing } from '../../data/storage';
+import {
+  filterByLocation,
+  toMapProperty,
+  type LocationSelection,
+  uniqueLocations,
+  getLocationFromAddress,
+} from '../../lib/mapUtils';
 import type { EscrowDeal } from '../../lib/escrow/types';
 import { OfferModal } from './OfferModal';
 import type { Listing } from './types';
@@ -59,7 +67,7 @@ export function MarketplacePage() {
   const { data, startEscrowFromBuy } = useAppData();
   const { showToast } = useToast();
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
-  const [locationFilter, setLocationFilter] = useState('all');
+  const [locationSelection, setLocationSelection] = useState<LocationSelection | null>(null);
   const [selectedStatusFilters, setSelectedStatusFilters] = useState<string[]>([
     'with-escrow',
     'no-escrow',
@@ -69,20 +77,18 @@ export function MarketplacePage() {
   const [maxPrice, setMaxPrice] = useState(700_000);
   const [maxSize, setMaxSize] = useState(3_500);
 
-  const locations = useMemo(
-    () => Array.from(new Set(data.listings.map((listing) => getLocation(listing.address)))),
-    [data.listings],
-  );
-
   const filteredListings = useMemo(
     () =>
       data.listings.filter((listing) => {
-        const location = getLocation(listing.address);
+        const property = data.properties.find((item) => item.id === listing.propertyId);
+        if (!property) return false;
+
         const sizeValue = getSizeValue(listing.size);
         const escrow = getEscrowDealForListing(data, listing.id);
 
         const escrowBucket = escrow ? 'with-escrow' : 'no-escrow';
-        const matchesLocation = locationFilter === 'all' || location === locationFilter;
+        const matchesLocation =
+          !locationSelection || filterByLocation([property], locationSelection).length > 0;
         const matchesStatus = selectedStatusFilters.includes(escrowBucket);
         const matchesSpecificStatus = escrow ? selectedStatusFilters.includes(escrow.status) : true;
         const matchesPrice = listing.askingPrice <= maxPrice;
@@ -90,15 +96,44 @@ export function MarketplacePage() {
 
         return matchesLocation && matchesStatus && matchesSpecificStatus && matchesPrice && matchesSize;
       }),
-    [data, locationFilter, maxPrice, maxSize, selectedStatusFilters],
+    [data, locationSelection, maxPrice, maxSize, selectedStatusFilters],
   );
 
-  const mapItems = filteredListings.map((listing) => ({
-    id: listing.id,
-    title: listing.address,
-    subtitle: `${formatPrice(listing.askingPrice)} · ${listing.size}`,
-    highlighted: selectedListing?.id === listing.id,
-  }));
+  // Get unique locations from all properties for the dropdown
+  const locationOptions = useMemo(() => {
+    const locations = data.properties
+      .map(prop => ({
+        address: prop.address,
+        lat: prop.lat,
+        lng: prop.lng
+      }))
+      .filter((item, index, self) =>
+        index === self.findIndex(t =>
+          t.address === item.address &&
+          t.lat === item.lat &&
+          t.lng === item.lng
+        )
+      );
+    return [
+      { address: 'All Locations', lat: 0, lng: 0 }, // Special option for all locations
+      ...locations
+    ];
+  }, [data.properties]);
+
+  const mapProperties = useMemo(
+    () =>
+      filteredListings.flatMap((listing) => {
+        const property = data.properties.find((item) => item.id === listing.propertyId);
+        if (!property) return [];
+        return [
+          toMapProperty(
+            property,
+            `${formatPrice(listing.askingPrice)} · ${listing.size}`,
+          ),
+        ];
+      }),
+    [data.properties, filteredListings],
+  );
 
   const handleBuy = async (listing: Listing) => {
     const deal = await startEscrowFromBuy(listing.id);
@@ -124,13 +159,29 @@ export function MarketplacePage() {
           <h3>Filters</h3>
           <label className="filter-field">
             <span>Location</span>
-            <select value={locationFilter} onChange={(event) => setLocationFilter(event.target.value)}>
-              <option value="all">All locations</option>
-              {locations.map((location) => (
-                <option key={location} value={location}>
-                  {location}
-                </option>
-              ))}
+            <select
+              id="marketplace-location"
+              value={locationSelection?.address || 'All Locations'}
+              onChange={(e) => {
+                const selectedValue = e.target.value;
+                if (selectedValue === 'All Locations') {
+                  setLocationSelection(null);
+                } else {
+                  const selectedLocation = locationOptions.find(
+                    loc => loc.address === selectedValue
+                  );
+                  setLocationSelection(selectedLocation || null);
+                }
+              }}
+            >
+              <option value="All Locations">All Locations</option>
+              {locationOptions
+                .filter(opt => opt.address !== 'All Locations')
+                .map(option => (
+                  <option key={option.address} value={option.address}>
+                    {option.address}
+                  </option>
+                ))}
             </select>
           </label>
 
@@ -256,7 +307,12 @@ export function MarketplacePage() {
         </div>
 
         <div className="map-panel">
-          <ResultMap title="Listing distribution" items={mapItems} />
+          <PropertyMap
+            title="Listing distribution"
+            properties={mapProperties}
+            center={locationSelection ?? undefined}
+            highlightedId={selectedListing?.propertyId ?? null}
+          />
         </div>
       </div>
 

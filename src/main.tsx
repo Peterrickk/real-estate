@@ -5,6 +5,7 @@ import { App } from './App';
 import { AppDataProvider } from './context/AppDataContext';
 import { ToastProvider } from './context/ToastContext';
 import './index.css';
+import 'leaflet/dist/leaflet.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
