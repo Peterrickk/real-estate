@@ -6,6 +6,8 @@ export interface Listing {
   askingPrice: number;
   sellerPubkey: string;
   listedAt: string;
+  /** Active escrow deal for this listing, if any. */
+  escrowId?: string;
 }
 
 export interface Offer {
@@ -18,3 +20,5 @@ export interface Offer {
   createdAt: string;
   status: 'pending' | 'accepted' | 'rejected' | 'expired';
 }
+
+export type { EscrowDeal, EscrowResolution, EscrowStatus } from '../../lib/escrow/types';

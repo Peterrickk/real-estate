@@ -1,0 +1,73 @@
+// 3-party payment escrow for real estate purchases on Bitcoin Cash.
+//
+// Scope: payment release only — does NOT mint, transfer, or manage property tokens.
+// Property tokenization is handled separately by the property-registry module.
+//
+// Parties:
+//   buyer   — deposits purchase funds into the escrow UTXO
+//   seller  — receives funds when the sale completes
+//   arbiter — licensed title company (neutral third party for disputes & clearance)
+//
+// Outcomes:
+//   completeSale  — seller + arbiter sign  → release funds to seller
+//   cancelSale    — buyer  + arbiter sign  → refund funds to buyer
+//   mutualClose   — buyer  + seller sign   → release funds to seller (no arbiter)
+
+contract RealEstateEscrow(bytes20 buyer, bytes20 seller, bytes20 arbiter) {
+    function completeSale(
+        pubkey sellerPk,
+        sig sellerSig,
+        pubkey arbiterPk,
+        sig arbiterSig
+    ) {
+        require(hash160(sellerPk) == seller);
+        require(hash160(arbiterPk) == arbiter);
+        require(checkSig(sellerSig, sellerPk));
+        require(checkSig(arbiterSig, arbiterPk));
+
+        int minerFee = 1000;
+        int amount = tx.inputs[this.activeInputIndex].value - minerFee;
+        require(tx.outputs[0].value == amount);
+
+        bytes25 sellerLock = new LockingBytecodeP2PKH(seller);
+        require(tx.outputs[0].lockingBytecode == sellerLock);
+    }
+
+    function cancelSale(
+        pubkey buyerPk,
+        sig buyerSig,
+        pubkey arbiterPk,
+        sig arbiterSig
+    ) {
+        require(hash160(buyerPk) == buyer);
+        require(hash160(arbiterPk) == arbiter);
+        require(checkSig(buyerSig, buyerPk));
+        require(checkSig(arbiterSig, arbiterPk));
+
+        int minerFee = 1000;
+        int amount = tx.inputs[this.activeInputIndex].value - minerFee;
+        require(tx.outputs[0].value == amount);
+
+        bytes25 buyerLock = new LockingBytecodeP2PKH(buyer);
+        require(tx.outputs[0].lockingBytecode == buyerLock);
+    }
+
+    function mutualClose(
+        pubkey buyerPk,
+        sig buyerSig,
+        pubkey sellerPk,
+        sig sellerSig
+    ) {
+        require(hash160(buyerPk) == buyer);
+        require(hash160(sellerPk) == seller);
+        require(checkSig(buyerSig, buyerPk));
+        require(checkSig(sellerSig, sellerPk));
+
+        int minerFee = 1000;
+        int amount = tx.inputs[this.activeInputIndex].value - minerFee;
+        require(tx.outputs[0].value == amount);
+
+        bytes25 sellerLock = new LockingBytecodeP2PKH(seller);
+        require(tx.outputs[0].lockingBytecode == sellerLock);
+    }
+}

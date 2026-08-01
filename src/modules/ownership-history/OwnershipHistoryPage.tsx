@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { mockProperties, mockTransferHistory } from '../../data/mockProperties';
+import { mockProperties } from '../../data/mockProperties';
+import { getTransferHistoryForProperty } from '../../lib/propertyData';
 import { TransferRecordRow } from './TransferRecord';
 
 export function OwnershipHistoryPage() {
   const [selectedPropertyId, setSelectedPropertyId] = useState(mockProperties[0]?.id ?? '');
 
-  const records = mockTransferHistory[selectedPropertyId] ?? [];
+  const records = getTransferHistoryForProperty(selectedPropertyId);
   const selectedProperty = mockProperties.find((p) => p.id === selectedPropertyId);
 
   return (
