@@ -12,11 +12,7 @@ function resolvePreferredHome(from: string): HomeRoute {
 }
 
 export function LoginPage() {
-<<<<<<< HEAD
   const { login, signup } = useAuth();
-=======
-  const { login } = useAuth();
->>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
   const navigate = useNavigate();
   const location = useLocation();
   const from = (location.state as { from?: string } | null)?.from ?? '/marketplace';
@@ -27,10 +23,7 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
-<<<<<<< HEAD
   const [isSubmitting, setIsSubmitting] = useState(false);
-=======
->>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
 
   const switchMode = (nextMode: AuthMode) => {
     setMode(nextMode);
@@ -39,11 +32,7 @@ export function LoginPage() {
     setConfirmPassword('');
   };
 
-<<<<<<< HEAD
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-=======
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
->>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
     event.preventDefault();
     setError('');
 
@@ -52,14 +41,11 @@ export function LoginPage() {
       return;
     }
 
-<<<<<<< HEAD
     if (!password) {
       setError('Enter your password to continue.');
       return;
     }
 
-=======
->>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
     if (mode === 'signup') {
       if (!displayName.trim()) {
         setError('Enter your name to create an account.');
@@ -75,7 +61,6 @@ export function LoginPage() {
         setError('Passwords do not match.');
         return;
       }
-<<<<<<< HEAD
     }
 
     setIsSubmitting(true);
@@ -103,19 +88,6 @@ export function LoginPage() {
     setError('');
     setEmail('avery@example.com');
     setPassword('demo1234');
-=======
-    } else if (password.length > 0 && password.length < 6) {
-      setError('Password must be at least 6 characters.');
-      return;
-    }
-
-    login({
-      displayName: mode === 'signup' ? displayName : displayName.trim() || 'Avery',
-      email,
-      preferredHome: resolvePreferredHome(from),
-    });
-    navigate(from, { replace: true });
->>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
   };
 
   const isSignup = mode === 'signup';
@@ -210,11 +182,7 @@ export function LoginPage() {
               type="password"
               name="password"
               autoComplete={isSignup ? 'new-password' : 'current-password'}
-<<<<<<< HEAD
               placeholder={isSignup ? 'At least 6 characters' : 'Enter your password'}
-=======
-              placeholder={isSignup ? 'At least 6 characters' : 'Demo — any value works'}
->>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
               value={password}
               onChange={(event) => setPassword(event.target.value)}
             />
@@ -239,7 +207,6 @@ export function LoginPage() {
             </p>
           ) : null}
 
-<<<<<<< HEAD
           <button type="submit" className="btn btn-primary login-form__submit" disabled={isSubmitting}>
             {isSubmitting ? 'Please wait…' : isSignup ? 'Create account' : 'Sign in'}
           </button>
@@ -254,13 +221,6 @@ export function LoginPage() {
           </p>
         ) : null}
 
-=======
-          <button type="submit" className="btn btn-primary login-form__submit">
-            {isSignup ? 'Create account' : 'Sign in'}
-          </button>
-        </form>
-
->>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
         <p className="login-page__footer">
           {isSignup ? (
             <>
