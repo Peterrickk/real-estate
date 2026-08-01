@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { LocationAutocomplete } from '../../components/LocationAutocomplete';
 import { PropertyMap } from '../../components/PropertyMap';
 import { useAppData } from '../../context/AppDataContext';
 import { filterByLocation, toMapProperty, type LocationSelection } from '../../lib/mapUtils';

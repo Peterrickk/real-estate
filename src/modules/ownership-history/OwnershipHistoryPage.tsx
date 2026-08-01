@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { PropertyMap } from '../../components/PropertyMap';
 import { useAppData } from '../../context/AppDataContext';
-import { filterByLocation, toMapProperty, type LocationSelection, uniqueLocations, getLocationFromAddress } from '../../lib/mapUtils';
+import { filterByLocation, toMapProperty, type LocationSelection } from '../../lib/mapUtils';
 import { TransferRecordRow } from './TransferRecord';
 
 const sourceFilters = [

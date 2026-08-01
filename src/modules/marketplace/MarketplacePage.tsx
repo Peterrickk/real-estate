@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { LocationAutocomplete } from '../../components/LocationAutocomplete';
 import { PropertyMap } from '../../components/PropertyMap';
 import { useAppData } from '../../context/AppDataContext';
 import { useToast } from '../../context/ToastContext';
@@ -8,8 +7,6 @@ import {
   filterByLocation,
   toMapProperty,
   type LocationSelection,
-  uniqueLocations,
-  getLocationFromAddress,
 } from '../../lib/mapUtils';
 import type { EscrowDeal } from '../../lib/escrow/types';
 import { OfferModal } from './OfferModal';

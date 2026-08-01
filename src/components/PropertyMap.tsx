@@ -28,7 +28,7 @@ function MapRecenter({ center, zoom }: { center: LatLng; zoom: number }) {
 
   useEffect(() => {
     map.setView(center, zoom, { animate: true });
-  }, [map, center.lat, center.lng, zoom]);
+  }, [map, center.lat, center.lng, zoom]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return null;
 }

@@ -29,19 +29,68 @@
     }
   ],
   "bytecode": "OP_3 OP_PICK OP_0 OP_NUMEQUAL OP_IF OP_4 OP_ROLL OP_ROT OP_CHECKSIGVERIFY OP_3 OP_ROLL OP_ROT OP_CHECKSIG OP_NIP OP_NIP OP_ELSE OP_3 OP_PICK OP_1 OP_NUMEQUAL OP_IF OP_4 OP_ROLL OP_SWAP OP_CHECKSIGVERIFY OP_3 OP_ROLL OP_ROT OP_CHECKSIG OP_NIP OP_NIP OP_ELSE OP_3 OP_ROLL OP_2 OP_NUMEQUALVERIFY OP_3 OP_ROLL OP_SWAP OP_CHECKSIGVERIFY OP_ROT OP_SWAP OP_CHECKSIG OP_NIP OP_ENDIF OP_ENDIF",
-  "source": "pragma cashscript ^0.13.0;\r\n\r\ncontract PropertySaleEscrow(pubkey buyer, pubkey seller, pubkey arbiter) {\r\n    function completeSale(sig sellerSig, sig arbiterSig) {\r\n        require(checkSig(sellerSig, seller));\r\n        require(checkSig(arbiterSig, arbiter));\r\n    }\r\n    function cancelSale(sig buyerSig, sig arbiterSig) {\r\n        require(checkSig(buyerSig, buyer));\r\n        require(checkSig(arbiterSig, arbiter));\r\n    }\r\n    function mutualClose(sig buyerSig, sig sellerSig) {\r\n        require(checkSig(buyerSig, buyer));\r\n        require(checkSig(sellerSig, seller));\r\n    }\r\n}\r\n",
+  "source": "pragma cashscript ^0.13.0;\n\ncontract PropertySaleEscrow(pubkey buyer, pubkey seller, pubkey arbiter) {\n    // Path 1: Seller and arbiter approve the sale, so title transfer can complete.\n    function completeSale(sig sellerSig, sig arbiterSig) {\n        console.log(\"completeSale: checking sellerSig against seller pubkey:\", seller);\n        console.log(\"completeSale: checking arbiterSig against arbiter pubkey:\", arbiter);\n        require(checkSig(sellerSig, seller), \"Seller signature invalid\");\n        require(checkSig(arbiterSig, arbiter), \"Arbiter signature invalid\");\n    }\n    // Path 2: Buyer and arbiter approve cancellation, so funds return to the buyer.\n    function cancelSale(sig buyerSig, sig arbiterSig) {\n        console.log(\"cancelSale: checking buyerSig against buyer pubkey:\", buyer);\n        console.log(\"cancelSale: checking arbiterSig against arbiter pubkey:\", arbiter);\n        require(checkSig(buyerSig, buyer), \"Buyer signature invalid\");\n        require(checkSig(arbiterSig, arbiter), \"Arbiter signature invalid\");\n    }\n    // Path 3: Buyer and seller agree directly, so escrow can close mutually.\n    function mutualClose(sig buyerSig, sig sellerSig) {\n        console.log(\"mutualClose: checking buyerSig against buyer pubkey:\", buyer);\n        console.log(\"mutualClose: checking sellerSig against seller pubkey:\", seller);\n        require(checkSig(buyerSig, buyer), \"Buyer signature invalid\");\n        require(checkSig(sellerSig, seller), \"Seller signature invalid\");\n    }\n}\n",
   "fingerprint": "4637e13c30855d2552038d215044d005e021b16efc63356e318d2935bb36db8b",
   "debug": {
     "bytecode": "5379009c63547a7bad537a7bac7777675379519c63547a7cad537a7bac777767537a529d537a7cad7b7cac776868",
-    "sourceMap": "4:4:7:5;;;;;5:25:5:34;;:36::42;:8::45:1;6:25:6:35:0;;:37::44;:8::47:1;4:57:7:5;;:4;8::11::0;;;;;9:25:9:33;;:35::40;:8::43:1;10:25:10:35:0;;:37::44;:8::47:1;8:54:11:5;;:4;12::15::0;;;;13:25:13:33;;:35::40;:8::43:1;14:25:14:34:0;:36::42;:8::45:1;12:54:15:5;3:0:16:1;",
-    "logs": [],
+    "sourceMap": "5:4:10:5;;;;;8:25:8:34;;:36::42;:8::73:1;9:25:9:35:0;;:37::44;:8::76:1;5:57:10:5;;:4;12::17::0;;;;;15:25:15:33;;:35::40;:8::70:1;16:25:16:35:0;;:37::44;:8::76:1;12:54:17:5;;:4;19::24::0;;;;22:25:22:33;;:35::40;:8::70:1;23:25:23:34:0;:36::42;:8::73:1;19:54:24:5;3:0:25:1;",
+    "logs": [
+      {
+        "ip": 8,
+        "line": 6,
+        "data": [
+          "completeSale: checking sellerSig against seller pubkey:",
+          { "stackIndex": 1, "type": "pubkey", "ip": 8 }
+        ]
+      },
+      {
+        "ip": 8,
+        "line": 7,
+        "data": [
+          "completeSale: checking arbiterSig against arbiter pubkey:",
+          { "stackIndex": 2, "type": "pubkey", "ip": 8 }
+        ]
+      },
+      {
+        "ip": 24,
+        "line": 13,
+        "data": [
+          "cancelSale: checking buyerSig against buyer pubkey:",
+          { "stackIndex": 0, "type": "pubkey", "ip": 24 }
+        ]
+      },
+      {
+        "ip": 24,
+        "line": 14,
+        "data": [
+          "cancelSale: checking arbiterSig against arbiter pubkey:",
+          { "stackIndex": 2, "type": "pubkey", "ip": 24 }
+        ]
+      },
+      {
+        "ip": 39,
+        "line": 20,
+        "data": [
+          "mutualClose: checking buyerSig against buyer pubkey:",
+          { "stackIndex": 0, "type": "pubkey", "ip": 39 }
+        ]
+      },
+      {
+        "ip": 39,
+        "line": 21,
+        "data": [
+          "mutualClose: checking sellerSig against seller pubkey:",
+          { "stackIndex": 1, "type": "pubkey", "ip": 39 }
+        ]
+      }
+    ],
     "requires": [
-      { "ip": 11, "line": 5 },
-      { "ip": 16, "line": 6 },
-      { "ip": 27, "line": 9 },
-      { "ip": 32, "line": 10 },
-      { "ip": 42, "line": 13 },
-      { "ip": 46, "line": 14 }
+      { "ip": 11, "line": 8, "message": "Seller signature invalid" },
+      { "ip": 16, "line": 9, "message": "Arbiter signature invalid" },
+      { "ip": 27, "line": 15, "message": "Buyer signature invalid" },
+      { "ip": 32, "line": 16, "message": "Arbiter signature invalid" },
+      { "ip": 42, "line": 22, "message": "Buyer signature invalid" },
+      { "ip": 46, "line": 23, "message": "Seller signature invalid" }
     ],
     "sourceTags": "13:14:sc;29:30:sc;43:43:sc"
   },
@@ -53,5 +102,5 @@
       "enforceLocktimeGuard": true
     }
   },
-  "updatedAt": "2026-08-01T05:15:10.291Z"
+  "updatedAt": "2026-08-01T10:25:21.549Z"
 }

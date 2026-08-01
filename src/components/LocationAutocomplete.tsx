@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import type { Property } from '../../modules/property-registry/types';
 import type { LocationSelection } from '../../lib/mapUtils';
 
 interface LocationAutocompleteProps {
