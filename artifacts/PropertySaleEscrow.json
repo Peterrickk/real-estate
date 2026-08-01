@@ -1,0 +1,57 @@
+{
+  "contractName": "PropertySaleEscrow",
+  "constructorInputs": [
+    { "name": "buyer", "type": "pubkey" },
+    { "name": "seller", "type": "pubkey" },
+    { "name": "arbiter", "type": "pubkey" }
+  ],
+  "abi": [
+    {
+      "name": "completeSale",
+      "inputs": [
+        { "name": "sellerSig", "type": "sig" },
+        { "name": "arbiterSig", "type": "sig" }
+      ]
+    },
+    {
+      "name": "cancelSale",
+      "inputs": [
+        { "name": "buyerSig", "type": "sig" },
+        { "name": "arbiterSig", "type": "sig" }
+      ]
+    },
+    {
+      "name": "mutualClose",
+      "inputs": [
+        { "name": "buyerSig", "type": "sig" },
+        { "name": "sellerSig", "type": "sig" }
+      ]
+    }
+  ],
+  "bytecode": "OP_3 OP_PICK OP_0 OP_NUMEQUAL OP_IF OP_4 OP_ROLL OP_ROT OP_CHECKSIGVERIFY OP_3 OP_ROLL OP_ROT OP_CHECKSIG OP_NIP OP_NIP OP_ELSE OP_3 OP_PICK OP_1 OP_NUMEQUAL OP_IF OP_4 OP_ROLL OP_SWAP OP_CHECKSIGVERIFY OP_3 OP_ROLL OP_ROT OP_CHECKSIG OP_NIP OP_NIP OP_ELSE OP_3 OP_ROLL OP_2 OP_NUMEQUALVERIFY OP_3 OP_ROLL OP_SWAP OP_CHECKSIGVERIFY OP_ROT OP_SWAP OP_CHECKSIG OP_NIP OP_ENDIF OP_ENDIF",
+  "source": "pragma cashscript ^0.13.0;\n\ncontract PropertySaleEscrow(pubkey buyer, pubkey seller, pubkey arbiter) {\n    function completeSale(sig sellerSig, sig arbiterSig) {\n        require(checkSig(sellerSig, seller));\n        require(checkSig(arbiterSig, arbiter));\n    }\n    function cancelSale(sig buyerSig, sig arbiterSig) {\n        require(checkSig(buyerSig, buyer));\n        require(checkSig(arbiterSig, arbiter));\n    }\n    function mutualClose(sig buyerSig, sig sellerSig) {\n        require(checkSig(buyerSig, buyer));\n        require(checkSig(sellerSig, seller));\n    }\n}\n",
+  "fingerprint": "4637e13c30855d2552038d215044d005e021b16efc63356e318d2935bb36db8b",
+  "debug": {
+    "bytecode": "5379009c63547a7bad537a7bac7777675379519c63547a7cad537a7bac777767537a529d537a7cad7b7cac776868",
+    "sourceMap": "4:4:7:5;;;;;5:25:5:34;;:36::42;:8::45:1;6:25:6:35:0;;:37::44;:8::47:1;4:57:7:5;;:4;8::11::0;;;;;9:25:9:33;;:35::40;:8::43:1;10:25:10:35:0;;:37::44;:8::47:1;8:54:11:5;;:4;12::15::0;;;;13:25:13:33;;:35::40;:8::43:1;14:25:14:34:0;:36::42;:8::45:1;12:54:15:5;3:0:16:1;",
+    "logs": [],
+    "requires": [
+      { "ip": 11, "line": 5 },
+      { "ip": 16, "line": 6 },
+      { "ip": 27, "line": 9 },
+      { "ip": 32, "line": 10 },
+      { "ip": 42, "line": 13 },
+      { "ip": 46, "line": 14 }
+    ],
+    "sourceTags": "13:14:sc;29:30:sc;43:43:sc"
+  },
+  "compiler": {
+    "name": "cashc",
+    "version": "0.13.2",
+    "options": {
+      "enforceFunctionParameterTypes": true,
+      "enforceLocktimeGuard": true
+    }
+  },
+  "updatedAt": "2026-08-01T02:52:21.335Z"
+}
