@@ -1,12 +1,8 @@
 import { useState } from 'react';
-<<<<<<< HEAD
 import { useAppData } from '../../context/AppDataContext';
 import { useToast } from '../../context/ToastContext';
-=======
-import { mockListings } from '../../data/mockProperties';
 import { getEscrowDealForListing } from '../../data/mockEscrowDeals';
-import { createEscrowDeal, completeSale, cancelSale, mutualClose } from '../../lib/escrow';
->>>>>>> f7a1a2edaaf22716f1614e68422ad9f3737e3f63
+import { completeSale, cancelSale, mutualClose } from '../../lib/escrow';
 import type { Listing } from './types';
 import type { EscrowDeal } from '../../lib/escrow/types';
 import { OfferModal } from './OfferModal';
@@ -45,7 +41,6 @@ export function MarketplacePage() {
   const { showToast } = useToast();
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
 
-<<<<<<< HEAD
   const handleBuy = (listing: Listing) => {
     const purchased = purchaseListing(listing.id);
     if (purchased) {
@@ -53,11 +48,6 @@ export function MarketplacePage() {
     } else {
       showToast('Unable to complete purchase.', 'info');
     }
-=======
-  const handleBuy = async (listing: Listing) => {
-    const deal = await createEscrowDeal(listing, '03mockbuyer00000000000000000000000001');
-    console.log('TODO: wire to contract', { action: 'buy', listingId: listing.id, deal });
->>>>>>> f7a1a2edaaf22716f1614e68422ad9f3737e3f63
   };
 
   const handleMakeOffer = (listing: Listing) => {
@@ -85,94 +75,78 @@ export function MarketplacePage() {
     <section className="page">
       <header className="page-header">
         <h1>Marketplace</h1>
-<<<<<<< HEAD
-        <p>Browse listed properties and interact with escrow contracts (demo mode).</p>
+        <p>
+          Payment escrow via 3-party CashScript contract (buyer, seller, title company arbiter).
+          Property token transfers are handled separately in the registry. Demo purchases update
+          ownership history immediately.
+        </p>
       </header>
 
       {data.listings.length === 0 ? (
         <p className="empty-state">No active listings. Reset demo data to restore listings.</p>
       ) : (
         <div className="card-grid">
-          {data.listings.map((listing) => (
-=======
-        <p>
-          Payment escrow via 3-party CashScript contract (buyer, seller, title company arbiter).
-          Property token transfers are handled separately in the registry.
-        </p>
-      </header>
+          {data.listings.map((listing) => {
+            const escrow = getEscrowDealForListing(listing.id);
 
-      <div className="card-grid">
-        {mockListings.map((listing) => {
-          const escrow = getEscrowDealForListing(listing.id);
+            return (
+              <article key={listing.id} className="card marketplace-card">
+                <h3>{listing.address}</h3>
+                <p className="muted">{listing.size}</p>
+                <p className="price">{formatPrice(listing.askingPrice)}</p>
+                <p className="muted">Seller: {truncatePubkey(listing.sellerPubkey)}</p>
+                <p className="muted">Listed: {listing.listedAt}</p>
 
-          return (
->>>>>>> f7a1a2edaaf22716f1614e68422ad9f3737e3f63
-            <article key={listing.id} className="card marketplace-card">
-              <h3>{listing.address}</h3>
-              <p className="muted">{listing.size}</p>
-              <p className="price">{formatPrice(listing.askingPrice)}</p>
-              <p className="muted">Seller: {truncatePubkey(listing.sellerPubkey)}</p>
-              <p className="muted">Listed: {listing.listedAt}</p>
-<<<<<<< HEAD
-              <div className="button-row">
-                <button type="button" className="btn btn-primary" onClick={() => handleBuy(listing)}>
-=======
-
-              {escrow && (
-                <div className="escrow-panel">
-                  <span className="badge badge-info">{escrowStatusLabel(escrow.status)}</span>
-                  <p className="muted escrow-detail">
-                    Arbiter: {escrow.parties.arbiterName} (title company)
-                  </p>
-                  <div className="button-row escrow-actions">
-                    <button
-                      type="button"
-                      className="btn btn-secondary btn-sm"
-                      onClick={() => handleEscrowAction(escrow, 'completeSale')}
-                      title="Seller + title company signatures"
-                    >
-                      Complete Sale
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-secondary btn-sm"
-                      onClick={() => handleEscrowAction(escrow, 'cancelSale')}
-                      title="Buyer + title company signatures"
-                    >
-                      Cancel Sale
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-secondary btn-sm"
-                      onClick={() => handleEscrowAction(escrow, 'mutualClose')}
-                      title="Buyer + seller signatures, no arbiter"
-                    >
-                      Mutual Close
-                    </button>
+                {escrow && (
+                  <div className="escrow-panel">
+                    <span className="badge badge-info">{escrowStatusLabel(escrow.status)}</span>
+                    <p className="muted escrow-detail">
+                      Arbiter: {escrow.parties.arbiterName} (title company)
+                    </p>
+                    <div className="button-row escrow-actions">
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => handleEscrowAction(escrow, 'completeSale')}
+                        title="Seller + title company signatures"
+                      >
+                        Complete Sale
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => handleEscrowAction(escrow, 'cancelSale')}
+                        title="Buyer + title company signatures"
+                      >
+                        Cancel Sale
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => handleEscrowAction(escrow, 'mutualClose')}
+                        title="Buyer + seller signatures, no arbiter"
+                      >
+                        Mutual Close
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              <div className="button-row">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={() => handleBuy(listing)}
-                >
->>>>>>> f7a1a2edaaf22716f1614e68422ad9f3737e3f63
-                  Buy
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => handleMakeOffer(listing)}
-                >
-                  Make Offer
-                </button>
-              </div>
-            </article>
-<<<<<<< HEAD
-          ))}
+                <div className="button-row">
+                  <button type="button" className="btn btn-primary" onClick={() => handleBuy(listing)}>
+                    Buy
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => handleMakeOffer(listing)}
+                  >
+                    Make Offer
+                  </button>
+                </div>
+              </article>
+            );
+          })}
         </div>
       )}
 
@@ -198,11 +172,6 @@ export function MarketplacePage() {
           </div>
         </section>
       )}
-=======
-          );
-        })}
-      </div>
->>>>>>> f7a1a2edaaf22716f1614e68422ad9f3737e3f63
 
       {selectedListing && (
         <OfferModal listing={selectedListing} onClose={() => setSelectedListing(null)} />
