@@ -11,7 +11,8 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "compile:contract": "cashc contracts/PropertySaleEscrow.cash -o artifacts/PropertySaleEscrow.json"
+    "compile:contract": "cashc contracts/PropertySaleEscrow.cash -o artifacts/PropertySaleEscrow.json",
+    "demo:PropertySaleEscrow": "npx ts-node demos/PropertySaleEscrow.ts"
   },
   "dependencies": {
     "cashscript": "^0.13.2",

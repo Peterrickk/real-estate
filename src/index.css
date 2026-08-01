@@ -450,6 +450,19 @@ img {
   border-color: rgba(47, 86, 68, 0.22);
 }
 
+.registry-nav {
+  justify-content: space-between;
+}
+
+.site-nav__login {
+  margin-left: auto;
+  min-height: 2.8rem;
+  padding-inline: 1.25rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
 /* Marketing landing */
 
 .marketing-page {
