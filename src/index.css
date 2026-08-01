@@ -695,8 +695,6 @@ img {
 }
 
 .filters-panel {
-  position: sticky;
-  top: 6.5rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -833,8 +831,7 @@ img {
 }
 
 .map-panel {
-  position: sticky;
-  top: 6.5rem;
+  align-self: start;
 }
 
 .result-map {
@@ -1050,7 +1047,7 @@ img {
 
   .filters-panel,
   .map-panel {
-    position: static;
+    align-self: stretch;
   }
 
   .hero-search {
