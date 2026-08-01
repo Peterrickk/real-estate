@@ -36,7 +36,9 @@ export function LandInsightsPage() {
 
       {selectedProperty && (
         <p className="muted">
-          {selectedProperty.size} · {selectedProperty.address}
+          <span className="property-address property-address--inline">{selectedProperty.address}</span>
+          {' · '}
+          {selectedProperty.size}
         </p>
       )}
 

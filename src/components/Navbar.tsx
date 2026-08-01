@@ -19,7 +19,7 @@ export function Navbar() {
   };
 
   return (
-    <nav className="navbar">
+    <nav className="navbar" aria-label="Main">
       <NavLink to="/registry" className="navbar-brand">
         BCH Real Estate
       </NavLink>

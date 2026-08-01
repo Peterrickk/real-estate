@@ -91,11 +91,27 @@ export function MarketplacePage() {
 
             return (
               <article key={listing.id} className="card marketplace-card">
-                <h3>{listing.address}</h3>
-                <p className="muted">{listing.size}</p>
-                <p className="price">{formatPrice(listing.askingPrice)}</p>
-                <p className="muted">Seller: {truncatePubkey(listing.sellerPubkey)}</p>
-                <p className="muted">Listed: {listing.listedAt}</p>
+                <div className="marketplace-card__info">
+                  <h3 className="property-address">{listing.address}</h3>
+                  <p className="muted">{listing.size}</p>
+                  <p className="price">{formatPrice(listing.askingPrice)}</p>
+                </div>
+                <div className="marketplace-card__chain">
+                  <dl className="detail-list detail-list--ledger detail-list--single">
+                    <div>
+                      <dt>Listing ID</dt>
+                      <dd className="ledger-data">{listing.id}</dd>
+                    </div>
+                    <div>
+                      <dt>Seller</dt>
+                      <dd className="ledger-data ledger-data--brass">{truncatePubkey(listing.sellerPubkey)}</dd>
+                    </div>
+                    <div>
+                      <dt>Listed</dt>
+                      <dd className="ledger-data">{listing.listedAt}</dd>
+                    </div>
+                  </dl>
+                </div>
 
                 {escrow && (
                   <div className="escrow-panel">
@@ -159,7 +175,7 @@ export function MarketplacePage() {
               return (
                 <article key={offer.id} className="card offer-card">
                   <p>
-                    <strong>{listing?.address ?? offer.propertyId}</strong>
+                    <strong className="property-address property-address--inline">{listing?.address ?? offer.propertyId}</strong>
                   </p>
                   <p className="muted">
                     {formatPrice(offer.offerAmount)} · {offer.status} ·{' '}

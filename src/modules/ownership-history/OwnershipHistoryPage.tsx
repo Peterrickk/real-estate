@@ -33,8 +33,11 @@ export function OwnershipHistoryPage() {
       </div>
 
       {selectedProperty && (
-        <p className="muted">
-          Token <code>{selectedProperty.tokenId}</code> · Legal ID {selectedProperty.legalId}
+        <p className="muted ledger-line">
+          Token <span className="ledger-data ledger-data--brass">{selectedProperty.tokenId}</span>
+          {' · '}
+          Legal ID{' '}
+          <span className="ledger-data ledger-data--brass">{selectedProperty.legalId}</span>
         </p>
       )}
 

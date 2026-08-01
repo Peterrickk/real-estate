@@ -21,7 +21,7 @@ export function TransferRecordRow({ record }: TransferRecordProps) {
     <article className={`transfer-row${record.source === 'escrow' ? ' transfer-row-escrow' : ''}`}>
       <div className="transfer-owner">
         <span className="label">Owner</span>
-        <code>{truncatePubkey(record.owner)}</code>
+        <span className="ledger-data ledger-data--brass">{truncatePubkey(record.owner)}</span>
         {record.source === 'escrow' && <span className="badge badge-info badge-sm">Escrow</span>}
       </div>
       <div>

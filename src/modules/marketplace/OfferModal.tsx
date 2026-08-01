@@ -58,7 +58,7 @@ export function OfferModal({ listing, onClose }: OfferModalProps) {
           </button>
         </header>
 
-        <p className="muted">{listing.address}</p>
+        <p className="muted property-address property-address--inline">{listing.address}</p>
         <p>
           Asking price: <strong>{formatPrice(listing.askingPrice)}</strong>
         </p>
