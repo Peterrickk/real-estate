@@ -19,23 +19,23 @@ export function Navbar() {
   };
 
   return (
-    <nav className="navbar" aria-label="Main">
-      <NavLink to="/registry" className="navbar-brand">
+    <nav className="site-nav" aria-label="Primary">
+      <NavLink to="/registry" className="site-nav__brand">
         BCH Real Estate
       </NavLink>
-      <ul className="navbar-links">
+      <ul className="site-nav__links">
         {navItems.map(({ to, label }) => (
           <li key={to}>
             <NavLink
               to={to}
-              className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
+              className={({ isActive }) => (isActive ? 'site-nav__link is-active' : 'site-nav__link')}
             >
               {label}
             </NavLink>
           </li>
         ))}
         <li>
-          <button type="button" className="nav-link nav-reset" onClick={handleReset}>
+          <button type="button" className="site-nav__link site-nav__reset" onClick={handleReset}>
             Reset demo
           </button>
         </li>
