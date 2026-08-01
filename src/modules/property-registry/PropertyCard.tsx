@@ -1,5 +1,13 @@
 import type { Property } from './types';
-import heroImage from '../../assets/hero.png';
+
+const propertyImages = [
+  '/realestate1.jpg',
+  '/realestate2.jpeg',
+  '/realestate3.webp',
+  '/realestate4.jpg',
+  '/realestate6.jpeg',
+  '/realestate7.jpg',
+];
 
 interface PropertyCardProps {
   property: Property;
@@ -16,11 +24,13 @@ function formatPrice(price: number | null): string {
 
 export function PropertyCard({ property }: PropertyCardProps) {
   const statusLabel = property.listedPrice !== null ? 'For Sale' : property.tokenized ? 'Off Market' : 'Unlisted';
+  const imageIndex = Math.abs(property.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0)) % propertyImages.length;
+  const imageUrl = propertyImages[imageIndex];
 
   return (
     <article className="property-card">
       <div className="property-card__media">
-        <img className="property-card__image" src={heroImage} alt={property.address} />
+        <img className="property-card__image" src={imageUrl} alt={property.address} />
         <span className="property-card__status">{statusLabel}</span>
       </div>
 
