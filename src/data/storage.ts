@@ -1,7 +1,9 @@
+import type { EscrowDeal } from '../lib/escrow/types';
 import type { Listing, Offer } from '../modules/marketplace/types';
 import type { PriceHistoryPoint, ValuationSummary } from '../modules/land-insights/types';
 import type { TransferRecord } from '../modules/ownership-history/types';
 import type { Property } from '../modules/property-registry/types';
+import { mockEscrowDeals } from './mockEscrowDeals';
 import {
   mockListings,
   mockPriceHistory,
@@ -14,9 +16,13 @@ export const STORAGE_KEY = 'bch-real-estate-data';
 
 export const DEMO_BUYER_PUBKEY = '02demo000000000000000000000000000000000001';
 
+/** Demo seller — owner of prop-001 in mock data. */
+export const DEMO_SELLER_PUBKEY = '02a1b2c3d4e5f6789012345678901234567890abcd';
+
 export interface AppData {
   properties: Property[];
   listings: Listing[];
+  escrowDeals: EscrowDeal[];
   transferHistory: Record<string, TransferRecord[]>;
   priceHistory: Record<string, PriceHistoryPoint[]>;
   valuationSummaries: Record<string, ValuationSummary>;
@@ -27,6 +33,7 @@ export function getDefaultAppData(): AppData {
   return {
     properties: structuredClone(mockProperties),
     listings: structuredClone(mockListings),
+    escrowDeals: structuredClone(mockEscrowDeals),
     transferHistory: structuredClone(mockTransferHistory),
     priceHistory: structuredClone(mockPriceHistory),
     valuationSummaries: structuredClone(mockValuationSummaries),
@@ -39,11 +46,13 @@ export function loadAppData(): AppData {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return getDefaultAppData();
 
-    const parsed = JSON.parse(raw) as AppData;
+    const defaults = getDefaultAppData();
+    const parsed = JSON.parse(raw) as Partial<AppData>;
     return {
-      ...getDefaultAppData(),
+      ...defaults,
       ...parsed,
-      offers: parsed.offers ?? [],
+      offers: parsed.offers ?? defaults.offers,
+      escrowDeals: parsed.escrowDeals ?? defaults.escrowDeals,
     };
   } catch {
     return getDefaultAppData();
@@ -61,4 +70,14 @@ export function resetAppData(): AppData {
 
 export function getPropertyById(data: AppData, id: string): Property | undefined {
   return data.properties.find((property) => property.id === id);
+}
+
+export function getEscrowDealForListing(data: AppData, listingId: string): EscrowDeal | undefined {
+  return data.escrowDeals.find(
+    (deal) =>
+      deal.listingId === listingId &&
+      deal.status !== 'completed' &&
+      deal.status !== 'cancelled' &&
+      deal.status !== 'mutually_closed',
+  );
 }

@@ -4,6 +4,7 @@ import { useToast } from '../context/ToastContext';
 
 const navItems = [
   { to: '/marketplace', label: 'Marketplace', icon: MarketIcon },
+  { to: '/seller', label: 'Seller Dashboard', icon: SellerIcon },
   { to: '/history', label: 'Ownership History', icon: HistoryIcon },
   { to: '/insights', label: 'Land Insights', icon: InsightsIcon },
 ];
@@ -14,6 +15,16 @@ function MarketIcon() {
       <path d="M4 7h16l-1.5 12h-13z" fill="none" stroke="currentColor" strokeWidth="1.7" />
       <path d="M7 7c0-2.5 2-4.5 5-4.5S17 4.5 17 7" fill="none" stroke="currentColor" strokeWidth="1.7" />
       <path d="M9.2 11.5h5.6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function SellerIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M5 18.5h14" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      <path d="M7.5 8.5 12 5l4.5 3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M8.5 18.5v-7H15v7" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
     </svg>
   );
 }

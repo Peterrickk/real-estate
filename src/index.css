@@ -1704,6 +1704,49 @@ img {
   border-color: var(--color-ink-muted);
 }
 
+/* Seller dashboard */
+
+.seller-dashboard {
+  max-width: 56rem;
+}
+
+.seller-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.seller-stat-card {
+  padding: 1.25rem;
+  text-align: center;
+}
+
+.seller-stat-value {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-verdigris-deep);
+}
+
+.seller-section {
+  display: grid;
+  gap: 1rem;
+}
+
+.seller-section h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.08rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.seller-offer-card .offer-message,
+.seller-escrow-card .escrow-actions {
+  margin-top: 0.75rem;
+}
+
 @media (max-width: 768px) {
   .insights-layout {
     grid-template-columns: 1fr;
@@ -1736,6 +1779,10 @@ img {
 
   .navbar-links {
     justify-content: center;
+  }
+
+  .seller-stats {
+    grid-template-columns: 1fr;
   }
 }
 

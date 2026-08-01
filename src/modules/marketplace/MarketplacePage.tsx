@@ -2,8 +2,7 @@ import { useMemo, useState } from 'react';
 import { ResultMap } from '../../components/ResultMap';
 import { useAppData } from '../../context/AppDataContext';
 import { useToast } from '../../context/ToastContext';
-import { getEscrowDealForListing } from '../../data/mockEscrowDeals';
-import { cancelSale, completeSale, mutualClose } from '../../lib/escrow';
+import { getEscrowDealForListing } from '../../data/storage';
 import type { EscrowDeal } from '../../lib/escrow/types';
 import { OfferModal } from './OfferModal';
 import type { Listing } from './types';
@@ -57,7 +56,7 @@ function toggleFilterValue(values: string[], value: string): string[] {
 }
 
 export function MarketplacePage() {
-  const { data, purchaseListing } = useAppData();
+  const { data, startEscrowFromBuy } = useAppData();
   const { showToast } = useToast();
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [locationFilter, setLocationFilter] = useState('all');
@@ -80,7 +79,7 @@ export function MarketplacePage() {
       data.listings.filter((listing) => {
         const location = getLocation(listing.address);
         const sizeValue = getSizeValue(listing.size);
-        const escrow = getEscrowDealForListing(listing.id);
+        const escrow = getEscrowDealForListing(data, listing.id);
 
         const escrowBucket = escrow ? 'with-escrow' : 'no-escrow';
         const matchesLocation = locationFilter === 'all' || location === locationFilter;
@@ -91,7 +90,7 @@ export function MarketplacePage() {
 
         return matchesLocation && matchesStatus && matchesSpecificStatus && matchesPrice && matchesSize;
       }),
-    [data.listings, locationFilter, maxPrice, maxSize, selectedStatusFilters],
+    [data, locationFilter, maxPrice, maxSize, selectedStatusFilters],
   );
 
   const mapItems = filteredListings.map((listing) => ({
@@ -101,34 +100,17 @@ export function MarketplacePage() {
     highlighted: selectedListing?.id === listing.id,
   }));
 
-  const handleBuy = (listing: Listing) => {
-    const purchased = purchaseListing(listing.id);
-    if (purchased) {
-      showToast(`Purchase recorded for ${listing.address}. Check Ownership History.`);
+  const handleBuy = async (listing: Listing) => {
+    const deal = await startEscrowFromBuy(listing.id);
+    if (deal) {
+      showToast(`Escrow started for ${listing.address}. Seller can manage it in Seller Dashboard.`);
     } else {
-      showToast('Unable to complete purchase.', 'info');
+      showToast('Unable to start escrow.', 'info');
     }
   };
 
   const handleMakeOffer = (listing: Listing) => {
     setSelectedListing(listing);
-  };
-
-  const handleEscrowAction = async (
-    deal: EscrowDeal,
-    action: 'completeSale' | 'cancelSale' | 'mutualClose',
-  ) => {
-    switch (action) {
-      case 'completeSale':
-        await completeSale(deal);
-        break;
-      case 'cancelSale':
-        await cancelSale(deal);
-        break;
-      case 'mutualClose':
-        await mutualClose(deal);
-        break;
-    }
   };
 
   return (
@@ -209,7 +191,7 @@ export function MarketplacePage() {
               <p className="empty-state">No active listings match the current filters.</p>
             ) : (
               filteredListings.map((listing) => {
-                const escrow = getEscrowDealForListing(listing.id);
+                const escrow = getEscrowDealForListing(data, listing.id);
 
                 return (
                   <article key={listing.id} className="card result-card">
@@ -243,34 +225,10 @@ export function MarketplacePage() {
                     </dl>
 
                     {escrow && (
-                      <div className="escrow-panel">
-                        <p className="muted escrow-detail">
-                          Arbiter: {escrow.parties.arbiterName} · Contract {escrow.contractAddress}
-                        </p>
-                        <div className="button-row escrow-actions">
-                          <button
-                            type="button"
-                            className="btn btn-secondary btn-sm"
-                            onClick={() => handleEscrowAction(escrow, 'completeSale')}
-                          >
-                            Complete Sale
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn-secondary btn-sm"
-                            onClick={() => handleEscrowAction(escrow, 'cancelSale')}
-                          >
-                            Cancel Sale
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn-secondary btn-sm"
-                            onClick={() => handleEscrowAction(escrow, 'mutualClose')}
-                          >
-                            Mutual Close
-                          </button>
-                        </div>
-                      </div>
+                      <p className="muted escrow-detail">
+                        Escrow active · Arbiter: {escrow.parties.arbiterName}
+                        {escrow.contractAddress ? ` · ${escrow.contractAddress}` : ''}
+                      </p>
                     )}
 
                     <div className="button-row">
@@ -278,6 +236,7 @@ export function MarketplacePage() {
                         type="button"
                         className="btn btn-primary"
                         onClick={() => handleBuy(listing)}
+                        disabled={Boolean(escrow)}
                       >
                         Buy
                       </button>
@@ -297,12 +256,30 @@ export function MarketplacePage() {
         </div>
 
         <div className="map-panel">
-          <ResultMap
-            title="Listing distribution"
-            items={mapItems}
-          />
+          <ResultMap title="Listing distribution" items={mapItems} />
         </div>
       </div>
+
+      {data.offers.length > 0 && (
+        <section className="offers-section">
+          <h3>Your submitted offers</h3>
+          <div className="results-stack">
+            {data.offers.map((offer) => {
+              const listing = data.listings.find((item) => item.id === offer.listingId);
+              return (
+                <article key={offer.id} className="card result-card">
+                  <p className="property-address">{listing?.address ?? offer.propertyId}</p>
+                  <p className="muted">
+                    {formatPrice(offer.offerAmount)} · {offer.status} ·{' '}
+                    {new Date(offer.createdAt).toLocaleString()}
+                  </p>
+                  {offer.message && <p className="offer-message">{offer.message}</p>}
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {selectedListing && <OfferModal listing={selectedListing} onClose={() => setSelectedListing(null)} />}
     </section>

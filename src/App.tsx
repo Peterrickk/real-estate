@@ -5,6 +5,7 @@ import { PropertyRegistryPage } from './modules/property-registry/PropertyRegist
 import { MarketplacePage } from './modules/marketplace/MarketplacePage';
 import { OwnershipHistoryPage } from './modules/ownership-history/OwnershipHistoryPage';
 import { LandInsightsPage } from './modules/land-insights/LandInsightsPage';
+import { SellerDashboardPage } from './modules/seller/SellerDashboardPage';
 
 export function App() {
   return (
@@ -15,6 +16,7 @@ export function App() {
       </Route>
       <Route element={<DashboardLayout />}>
         <Route path="/marketplace" element={<MarketplacePage />} />
+        <Route path="/seller" element={<SellerDashboardPage />} />
         <Route path="/history" element={<OwnershipHistoryPage />} />
         <Route path="/insights" element={<LandInsightsPage />} />
       </Route>
