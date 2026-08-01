@@ -1,7 +1,9 @@
-import { mockProperties } from '../../data/mockProperties';
+import { useAppData } from '../../context/AppDataContext';
 import { PropertyCard } from './PropertyCard';
 
 export function PropertyRegistryPage() {
+  const { data } = useAppData();
+
   return (
     <section className="page">
       <header className="page-header">
@@ -9,7 +11,7 @@ export function PropertyRegistryPage() {
         <p>On-chain representation of tokenized real estate assets.</p>
       </header>
       <div className="card-grid">
-        {mockProperties.map((property) => (
+        {data.properties.map((property) => (
           <PropertyCard key={property.id} property={property} />
         ))}
       </div>

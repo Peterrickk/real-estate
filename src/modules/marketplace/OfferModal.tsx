@@ -1,4 +1,6 @@
 import type { FormEvent } from 'react';
+import { useAppData } from '../../context/AppDataContext';
+import { useToast } from '../../context/ToastContext';
 import type { Listing } from './types';
 
 interface OfferModalProps {
@@ -15,9 +17,29 @@ function formatPrice(price: number): string {
 }
 
 export function OfferModal({ listing, onClose }: OfferModalProps) {
+  const { addOffer } = useAppData();
+  const { showToast } = useToast();
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log('TODO: wire to contract', { action: 'submitOffer', listingId: listing.id });
+    const formData = new FormData(event.currentTarget);
+    const offerAmount = Number(formData.get('offerAmount'));
+    const message = String(formData.get('message') ?? '').trim();
+
+    if (!Number.isFinite(offerAmount) || offerAmount <= 0) {
+      showToast('Enter a valid offer amount.', 'info');
+      return;
+    }
+
+    addOffer({
+      listingId: listing.id,
+      propertyId: listing.propertyId,
+      offerAmount,
+      message,
+    });
+
+    showToast(`Offer submitted for ${listing.address}.`);
+    onClose();
   };
 
   return (
@@ -44,11 +66,17 @@ export function OfferModal({ listing, onClose }: OfferModalProps) {
         <form className="offer-form" onSubmit={handleSubmit}>
           <label>
             Offer amount (USD)
-            <input type="number" defaultValue={listing.askingPrice - 10_000} min={0} />
+            <input
+              type="number"
+              name="offerAmount"
+              defaultValue={listing.askingPrice - 10_000}
+              min={0}
+              required
+            />
           </label>
           <label>
             Message to seller
-            <textarea rows={3} placeholder="Optional note with your offer…" />
+            <textarea name="message" rows={3} placeholder="Optional note with your offer…" />
           </label>
           <div className="button-row">
             <button type="button" className="btn btn-secondary" onClick={onClose}>

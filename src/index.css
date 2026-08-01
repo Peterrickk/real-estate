@@ -96,6 +96,13 @@ code {
   font-weight: 500;
 }
 
+.nav-reset {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+}
+
 /* Page */
 
 .page-header h1 {
@@ -462,4 +469,60 @@ code {
   font-size: 0.7rem;
   color: #888;
   margin-top: 0.35rem;
+}
+
+/* Offers */
+
+.offers-section {
+  margin-top: 2rem;
+}
+
+.offers-section h2 {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+}
+
+.offers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.offer-card p {
+  margin: 0.25rem 0;
+}
+
+.offer-message {
+  font-size: 0.9rem;
+  color: #444;
+}
+
+/* Toasts */
+
+.toast-stack {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 200;
+}
+
+.toast {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  max-width: 320px;
+}
+
+.toast-success {
+  background: #166534;
+  color: #fff;
+}
+
+.toast-info {
+  background: #1a56db;
+  color: #fff;
 }

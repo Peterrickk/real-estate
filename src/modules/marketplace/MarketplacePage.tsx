@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { mockListings } from '../../data/mockProperties';
+import { useAppData } from '../../context/AppDataContext';
+import { useToast } from '../../context/ToastContext';
 import type { Listing } from './types';
 import { OfferModal } from './OfferModal';
 
@@ -16,10 +17,17 @@ function truncatePubkey(pubkey: string): string {
 }
 
 export function MarketplacePage() {
+  const { data, purchaseListing } = useAppData();
+  const { showToast } = useToast();
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
 
   const handleBuy = (listing: Listing) => {
-    console.log('TODO: wire to contract', { action: 'buy', listingId: listing.id });
+    const purchased = purchaseListing(listing.id);
+    if (purchased) {
+      showToast(`Purchase recorded for ${listing.address}. Check Ownership History.`);
+    } else {
+      showToast('Unable to complete purchase.', 'info');
+    }
   };
 
   const handleMakeOffer = (listing: Listing) => {
@@ -30,32 +38,59 @@ export function MarketplacePage() {
     <section className="page">
       <header className="page-header">
         <h1>Marketplace</h1>
-        <p>Browse listed properties and interact with escrow contracts (coming soon).</p>
+        <p>Browse listed properties and interact with escrow contracts (demo mode).</p>
       </header>
 
-      <div className="card-grid">
-        {mockListings.map((listing) => (
-          <article key={listing.id} className="card marketplace-card">
-            <h3>{listing.address}</h3>
-            <p className="muted">{listing.size}</p>
-            <p className="price">{formatPrice(listing.askingPrice)}</p>
-            <p className="muted">Seller: {truncatePubkey(listing.sellerPubkey)}</p>
-            <p className="muted">Listed: {listing.listedAt}</p>
-            <div className="button-row">
-              <button type="button" className="btn btn-primary" onClick={() => handleBuy(listing)}>
-                Buy
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => handleMakeOffer(listing)}
-              >
-                Make Offer
-              </button>
-            </div>
-          </article>
-        ))}
-      </div>
+      {data.listings.length === 0 ? (
+        <p className="empty-state">No active listings. Reset demo data to restore listings.</p>
+      ) : (
+        <div className="card-grid">
+          {data.listings.map((listing) => (
+            <article key={listing.id} className="card marketplace-card">
+              <h3>{listing.address}</h3>
+              <p className="muted">{listing.size}</p>
+              <p className="price">{formatPrice(listing.askingPrice)}</p>
+              <p className="muted">Seller: {truncatePubkey(listing.sellerPubkey)}</p>
+              <p className="muted">Listed: {listing.listedAt}</p>
+              <div className="button-row">
+                <button type="button" className="btn btn-primary" onClick={() => handleBuy(listing)}>
+                  Buy
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => handleMakeOffer(listing)}
+                >
+                  Make Offer
+                </button>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+
+      {data.offers.length > 0 && (
+        <section className="offers-section">
+          <h2>Submitted Offers</h2>
+          <div className="offers-list">
+            {data.offers.map((offer) => {
+              const listing = data.listings.find((item) => item.id === offer.listingId);
+              return (
+                <article key={offer.id} className="card offer-card">
+                  <p>
+                    <strong>{listing?.address ?? offer.propertyId}</strong>
+                  </p>
+                  <p className="muted">
+                    {formatPrice(offer.offerAmount)} · {offer.status} ·{' '}
+                    {new Date(offer.createdAt).toLocaleString()}
+                  </p>
+                  {offer.message && <p className="offer-message">{offer.message}</p>}
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {selectedListing && (
         <OfferModal listing={selectedListing} onClose={() => setSelectedListing(null)} />

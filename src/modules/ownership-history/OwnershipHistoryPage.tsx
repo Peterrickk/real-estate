@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { mockProperties, mockTransferHistory } from '../../data/mockProperties';
+import { useAppData } from '../../context/AppDataContext';
 import { TransferRecordRow } from './TransferRecord';
 
 export function OwnershipHistoryPage() {
-  const [selectedPropertyId, setSelectedPropertyId] = useState(mockProperties[0]?.id ?? '');
+  const { data } = useAppData();
+  const tokenizedProperties = data.properties.filter((property) => property.tokenized);
+  const [selectedPropertyId, setSelectedPropertyId] = useState(tokenizedProperties[0]?.id ?? '');
 
-  const records = mockTransferHistory[selectedPropertyId] ?? [];
-  const selectedProperty = mockProperties.find((p) => p.id === selectedPropertyId);
+  const records = data.transferHistory[selectedPropertyId] ?? [];
+  const selectedProperty = data.properties.find((property) => property.id === selectedPropertyId);
 
   return (
     <section className="page">
@@ -22,9 +24,7 @@ export function OwnershipHistoryPage() {
           value={selectedPropertyId}
           onChange={(e) => setSelectedPropertyId(e.target.value)}
         >
-          {mockProperties
-            .filter((p) => p.tokenized)
-            .map((property) => (
+          {tokenizedProperties.map((property) => (
               <option key={property.id} value={property.id}>
                 {property.address}
               </option>

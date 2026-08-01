@@ -1,4 +1,6 @@
 import { NavLink } from 'react-router-dom';
+import { useAppData } from '../context/AppDataContext';
+import { useToast } from '../context/ToastContext';
 
 const navItems = [
   { to: '/registry', label: 'Property Registry' },
@@ -8,6 +10,14 @@ const navItems = [
 ];
 
 export function Navbar() {
+  const { resetData } = useAppData();
+  const { showToast } = useToast();
+
+  const handleReset = () => {
+    resetData();
+    showToast('Demo data reset.', 'info');
+  };
+
   return (
     <nav className="navbar">
       <NavLink to="/registry" className="navbar-brand">
@@ -24,6 +34,11 @@ export function Navbar() {
             </NavLink>
           </li>
         ))}
+        <li>
+          <button type="button" className="nav-link nav-reset" onClick={handleReset}>
+            Reset demo
+          </button>
+        </li>
       </ul>
     </nav>
   );
