@@ -651,6 +651,217 @@ img {
   text-transform: uppercase;
 }
 
+/* Login */
+
+.login-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 420px);
+  gap: clamp(1.5rem, 4vw, 3rem);
+  align-items: stretch;
+  min-height: calc(100vh - 5.5rem);
+  padding: clamp(1rem, 3vw, 2rem) 0 2.5rem;
+}
+
+.login-page__visual {
+  position: relative;
+  overflow: hidden;
+  min-height: 28rem;
+  border-radius: 2rem;
+  background:
+    linear-gradient(180deg, rgba(14, 12, 10, 0.22), rgba(14, 12, 10, 0.52)),
+    url('/realestate1.jpg') center/cover no-repeat;
+  box-shadow: 0 36px 80px rgba(23, 20, 18, 0.16);
+}
+
+.login-page__visual-backdrop {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(9, 8, 7, 0.12), rgba(9, 8, 7, 0.62)),
+    radial-gradient(circle at 20% 80%, rgba(47, 86, 68, 0.28), transparent 55%);
+}
+
+.login-page__visual-copy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 100%;
+  padding: clamp(1.75rem, 4vw, 3rem);
+  color: #f8f3ea;
+}
+
+.login-page__brand {
+  margin: 0 0 1rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(248, 243, 234, 0.78);
+}
+
+.login-page__visual-copy h2 {
+  margin: 0;
+  max-width: 16ch;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+
+.login-page__visual-copy p:last-child {
+  max-width: 42ch;
+  margin: 1rem 0 0;
+  line-height: 1.75;
+  color: rgba(248, 243, 234, 0.88);
+}
+
+.login-page__panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  border-radius: 2rem;
+  background: var(--color-parchment-elevated);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
+}
+
+.login-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+  padding: 0.35rem;
+  border-radius: 999px;
+  background: rgba(247, 245, 241, 0.9);
+  border: 1px solid rgba(23, 20, 18, 0.08);
+}
+
+.login-tabs__tab {
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-ink-muted);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease-out,
+    color 0.15s ease-out,
+    border-color 0.15s ease-out;
+}
+
+.login-tabs__tab:hover {
+  color: var(--color-ink);
+}
+
+.login-tabs__tab.is-active {
+  background: var(--color-verdigris);
+  border-color: var(--color-verdigris-deep);
+  color: var(--color-parchment-elevated);
+}
+
+.login-tabs__tab:focus-visible {
+  outline: 2px solid var(--color-verdigris);
+  outline-offset: 2px;
+}
+
+.login-page__header h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 2.6rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+
+.login-page__header p {
+  margin: 0.75rem 0 0;
+  max-width: 36ch;
+  color: var(--color-ink-muted);
+  line-height: 1.65;
+}
+
+.login-page__header {
+  margin-top: 1.5rem;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  margin-top: 1.5rem;
+}
+
+.login-form__error {
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--radius-md);
+  background: rgba(139, 58, 58, 0.08);
+  border: 1px solid rgba(139, 58, 58, 0.22);
+  color: var(--color-danger);
+  font-size: 0.9rem;
+}
+
+.login-form__submit {
+  width: 100%;
+  min-height: 3rem;
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.login-page__footer {
+  margin: 1.75rem 0 0;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.login-page__footer a {
+  color: var(--color-verdigris-deep);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.login-page__footer a:hover {
+  text-decoration: underline;
+}
+
+.login-page__footer a:focus-visible {
+  outline: 2px solid var(--color-verdigris);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.login-page__switch {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-verdigris-deep);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.login-page__switch:hover {
+  color: var(--color-verdigris);
+}
+
+.login-page__switch:focus-visible {
+  outline: 2px solid var(--color-verdigris);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
 /* Marketing landing */
 
 .marketing-page {
@@ -936,6 +1147,9 @@ img {
 .filter-field select,
 .offer-form input,
 .offer-form textarea,
+.filter-field input[type='text'],
+.filter-field input[type='email'],
+.filter-field input[type='password'],
 .filter-field input[type='range'] {
   appearance: none;
   border: 1px solid rgba(23, 20, 18, 0.12);
@@ -947,8 +1161,19 @@ img {
 
 .filter-field select,
 .offer-form input,
-.offer-form textarea {
+.offer-form textarea,
+.filter-field input[type='text'],
+.filter-field input[type='email'],
+.filter-field input[type='password'] {
   padding: 0.7rem 0.8rem;
+}
+
+.filter-field input[type='text']:focus-visible,
+.filter-field input[type='email']:focus-visible,
+.filter-field input[type='password']:focus-visible,
+.filter-field select:focus-visible {
+  outline: 2px solid var(--color-verdigris);
+  outline-offset: 2px;
 }
 
 .checkbox-list {
@@ -1253,6 +1478,14 @@ img {
   .hero-search {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     border-radius: 1.5rem;
+  }
+
+  .login-page {
+    grid-template-columns: 1fr;
+  }
+
+  .login-page__visual {
+    min-height: 18rem;
   }
 }
 
