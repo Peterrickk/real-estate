@@ -388,7 +388,6 @@ img {
   border-color: rgba(255, 255, 255, 0.1);
 }
 
-<<<<<<< HEAD
 .dashboard-sidebar__footer {
   margin-top: auto;
   display: flex;
@@ -398,10 +397,6 @@ img {
 }
 
 .dashboard-sidebar__action {
-=======
-.dashboard-sidebar__action {
-  margin-top: auto;
->>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
   cursor: pointer;
 }
 
@@ -837,7 +832,6 @@ img {
   font-size: 0.9rem;
 }
 
-<<<<<<< HEAD
 .login-page__demo-hint {
   margin: 1rem 0 0;
   text-align: center;
@@ -852,8 +846,6 @@ img {
   background: rgba(255, 255, 255, 0.08);
 }
 
-=======
->>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
 .login-page__footer a {
   color: var(--color-verdigris-deep);
   font-weight: 600;
@@ -1068,7 +1060,6 @@ img {
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
-<<<<<<< HEAD
   color: inherit;
   text-decoration: none;
   cursor: pointer;
@@ -1083,8 +1074,6 @@ img {
   outline: 2px solid var(--color-verdigris);
   outline-offset: 3px;
   border-radius: 1.6rem;
-=======
->>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
 }
 
 .property-card__media {
