@@ -11,7 +11,7 @@ export const mockProperties: Property[] = [
     legalId: 'MIA-2024-00891',
     tokenId: 'BCH-RE-001',
     ownerPubkey: '02a1b2c3d4e5f6789012345678901234567890abcd',
-    listedPrice: 485_000,
+    listedPrice: null,
     dateTokenized: '2024-03-15',
     tokenized: true,
   },

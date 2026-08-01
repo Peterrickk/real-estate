@@ -1,15 +1,14 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useAppData } from '../../context/AppDataContext';
 import { useToast } from '../../context/ToastContext';
 import type { Property } from '../property-registry/types';
+import { CreateListingModal } from './CreateListingModal';
 import { ListPropertyModal } from './ListPropertyModal';
 import { OfferReviewCard } from './OfferReviewCard';
 import { SellerEscrowCard } from './SellerEscrowCard';
 import { formatPrice } from './types';
 
-type ListingModalState =
-  | { mode: 'create'; property: Property }
-  | { mode: 'edit'; property: Property; listingId: string; currentPrice: number };
+type ListingModalState = { mode: 'edit'; property: Property; listingId: string; currentPrice: number };
 
 export function SellerDashboardPage() {
   const {
@@ -26,28 +25,50 @@ export function SellerDashboardPage() {
   } = useAppData();
   const { showToast } = useToast();
   const [listingModal, setListingModal] = useState<ListingModalState | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createForPropertyId, setCreateForPropertyId] = useState<string | undefined>();
 
   const sellerProperties = getSellerProperties();
   const sellerListings = getSellerListings();
   const sellerOffers = getSellerOffers();
   const sellerEscrows = getSellerEscrows();
 
+  const unlistedProperties = useMemo(
+    () =>
+      sellerProperties.filter(
+        (property) =>
+          property.tokenized &&
+          !sellerListings.some((listing) => listing.propertyId === property.id),
+      ),
+    [sellerProperties, sellerListings],
+  );
+
   const getListingForProperty = (propertyId: string) =>
     sellerListings.find((listing) => listing.propertyId === propertyId);
 
+  const openCreateModal = (propertyId?: string) => {
+    setCreateForPropertyId(propertyId);
+    setShowCreateModal(true);
+  };
+
+  const closeCreateModal = () => {
+    setShowCreateModal(false);
+    setCreateForPropertyId(undefined);
+  };
+
+  const handleCreateListing = (propertyId: string, askingPrice: number) => {
+    const property = sellerProperties.find((item) => item.id === propertyId);
+    const created = createListing(propertyId, askingPrice);
+    showToast(
+      created
+        ? `${property?.address ?? 'Property'} listed for ${formatPrice(askingPrice)}.`
+        : 'Unable to create listing.',
+      created ? 'success' : 'info',
+    );
+  };
+
   const handleListSubmit = (askingPrice: number) => {
     if (!listingModal) return;
-
-    if (listingModal.mode === 'create') {
-      const created = createListing(listingModal.property.id, askingPrice);
-      showToast(
-        created
-          ? `${listingModal.property.address} listed for ${formatPrice(askingPrice)}.`
-          : 'Unable to list property.',
-        created ? 'success' : 'info',
-      );
-      return;
-    }
 
     const updated = updateListingPrice(listingModal.listingId, askingPrice);
     showToast(
@@ -122,7 +143,22 @@ export function SellerDashboardPage() {
       </div>
 
       <section className="seller-section">
-        <h3>My Properties</h3>
+        <div className="seller-section__header">
+          <h3>My Properties</h3>
+          <button
+            type="button"
+            className="btn btn-primary btn-sm"
+            disabled={unlistedProperties.length === 0}
+            onClick={() => openCreateModal()}
+          >
+            Create listing
+          </button>
+        </div>
+        {unlistedProperties.length === 0 && sellerListings.length > 0 && (
+          <p className="muted seller-section__hint">
+            All your tokenized properties are listed. Delist one to create a new listing.
+          </p>
+        )}
         {sellerProperties.length === 0 ? (
           <p className="empty-state">No properties owned by the demo seller.</p>
         ) : (
@@ -165,9 +201,9 @@ export function SellerDashboardPage() {
                       <button
                         type="button"
                         className="btn btn-primary btn-sm"
-                        onClick={() => setListingModal({ mode: 'create', property })}
+                        onClick={() => openCreateModal(property.id)}
                       >
-                        List for sale
+                        Create listing
                       </button>
                     )}
                     {isListed && listing && (
@@ -252,12 +288,21 @@ export function SellerDashboardPage() {
         )}
       </section>
 
+      {showCreateModal && unlistedProperties.length > 0 && (
+        <CreateListingModal
+          properties={unlistedProperties}
+          defaultPropertyId={createForPropertyId}
+          onSubmit={handleCreateListing}
+          onClose={closeCreateModal}
+        />
+      )}
+
       {listingModal && (
         <ListPropertyModal
           property={listingModal.property}
-          initialPrice={listingModal.mode === 'edit' ? listingModal.currentPrice : undefined}
-          title={listingModal.mode === 'create' ? 'List Property for Sale' : 'Edit Listing Price'}
-          submitLabel={listingModal.mode === 'create' ? 'List property' : 'Save price'}
+          initialPrice={listingModal.currentPrice}
+          title="Edit Listing Price"
+          submitLabel="Save price"
           onSubmit={handleListSubmit}
           onClose={() => setListingModal(null)}
         />

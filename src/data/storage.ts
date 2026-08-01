@@ -12,7 +12,7 @@ import {
   mockValuationSummaries,
 } from './mockProperties';
 
-export const STORAGE_KEY = 'bch-real-estate-data';
+export const STORAGE_KEY = 'bch-real-estate-data-v2';
 
 export const DEMO_BUYER_PUBKEY = '02demo000000000000000000000000000000000001';
 
