@@ -13,6 +13,8 @@ export function App() {
       <Route element={<Layout />}>
         <Route index element={<Navigate to="/registry" replace />} />
         <Route path="/registry" element={<PropertyRegistryPage />} />
+        
+
       </Route>
       <Route element={<DashboardLayout />}>
         <Route path="/marketplace" element={<MarketplacePage />} />

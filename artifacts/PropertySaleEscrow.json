@@ -29,7 +29,7 @@
     }
   ],
   "bytecode": "OP_3 OP_PICK OP_0 OP_NUMEQUAL OP_IF OP_4 OP_ROLL OP_ROT OP_CHECKSIGVERIFY OP_3 OP_ROLL OP_ROT OP_CHECKSIG OP_NIP OP_NIP OP_ELSE OP_3 OP_PICK OP_1 OP_NUMEQUAL OP_IF OP_4 OP_ROLL OP_SWAP OP_CHECKSIGVERIFY OP_3 OP_ROLL OP_ROT OP_CHECKSIG OP_NIP OP_NIP OP_ELSE OP_3 OP_ROLL OP_2 OP_NUMEQUALVERIFY OP_3 OP_ROLL OP_SWAP OP_CHECKSIGVERIFY OP_ROT OP_SWAP OP_CHECKSIG OP_NIP OP_ENDIF OP_ENDIF",
-  "source": "pragma cashscript ^0.13.0;\n\ncontract PropertySaleEscrow(pubkey buyer, pubkey seller, pubkey arbiter) {\n    function completeSale(sig sellerSig, sig arbiterSig) {\n        require(checkSig(sellerSig, seller));\n        require(checkSig(arbiterSig, arbiter));\n    }\n    function cancelSale(sig buyerSig, sig arbiterSig) {\n        require(checkSig(buyerSig, buyer));\n        require(checkSig(arbiterSig, arbiter));\n    }\n    function mutualClose(sig buyerSig, sig sellerSig) {\n        require(checkSig(buyerSig, buyer));\n        require(checkSig(sellerSig, seller));\n    }\n}\n",
+  "source": "pragma cashscript ^0.13.0;\r\n\r\ncontract PropertySaleEscrow(pubkey buyer, pubkey seller, pubkey arbiter) {\r\n    function completeSale(sig sellerSig, sig arbiterSig) {\r\n        require(checkSig(sellerSig, seller));\r\n        require(checkSig(arbiterSig, arbiter));\r\n    }\r\n    function cancelSale(sig buyerSig, sig arbiterSig) {\r\n        require(checkSig(buyerSig, buyer));\r\n        require(checkSig(arbiterSig, arbiter));\r\n    }\r\n    function mutualClose(sig buyerSig, sig sellerSig) {\r\n        require(checkSig(buyerSig, buyer));\r\n        require(checkSig(sellerSig, seller));\r\n    }\r\n}\r\n",
   "fingerprint": "4637e13c30855d2552038d215044d005e021b16efc63356e318d2935bb36db8b",
   "debug": {
     "bytecode": "5379009c63547a7bad537a7bac7777675379519c63547a7cad537a7bac777767537a529d537a7cad7b7cac776868",
@@ -53,5 +53,5 @@
       "enforceLocktimeGuard": true
     }
   },
-  "updatedAt": "2026-08-01T02:52:21.335Z"
+  "updatedAt": "2026-08-01T05:15:10.291Z"
 }

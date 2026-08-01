@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router-dom';
-import { Navbar } from './Navbar';
+import { RegistryNavbar } from './RegistryNavbar';
 
 export function Layout() {
   return (
@@ -7,7 +7,7 @@ export function Layout() {
       <a href="#main-content" className="skip-link">
         Skip to content
       </a>
-      <Navbar />
+      <RegistryNavbar />
       <main id="main-content" className="marketing-main" tabIndex={-1}>
         <Outlet />
       </main>
