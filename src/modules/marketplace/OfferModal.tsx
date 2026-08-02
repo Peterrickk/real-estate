@@ -10,9 +10,9 @@ interface OfferModalProps {
 }
 
 function formatPrice(price: number): string {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('en-PH', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'PHP',
     maximumFractionDigits: 0,
   }).format(price);
 }
@@ -46,7 +46,7 @@ export function OfferModal({ listing, onClose }: OfferModalProps) {
       buyerPubkey: buyerWallet.publicKey,
     });
 
-    showToast(`Offer submitted for ${listing.address}.`);
+    showToast(`🎉 Offer submitted for the NFT Land Certificate at ${listing.address}. If accepted, the NFT and all ownership documents will be transferred to your BCH wallet.`);
     onClose();
   };
 
@@ -60,7 +60,7 @@ export function OfferModal({ listing, onClose }: OfferModalProps) {
         onClick={(e) => e.stopPropagation()}
       >
         <header className="modal-header">
-          <h2 id="offer-modal-title">Make an Offer</h2>
+          <h2 id="offer-modal-title">Make an NFT Offer</h2>
           <button type="button" className="btn-icon" onClick={onClose} aria-label="Close">
             ×
           </button>
@@ -70,15 +70,20 @@ export function OfferModal({ listing, onClose }: OfferModalProps) {
         <p>
           Asking price: <strong>{formatPrice(listing.askingPrice)}</strong>
         </p>
+        <p className="muted" style={{fontSize: '0.85rem', marginTop: '0.5rem'}}>
+          📜 You are making an offer on the Land Title NFT. If accepted, the NFT certificate and all ownership documents will be transferred to your BCH wallet.
+        </p>
 
         <form className="offer-form" onSubmit={handleSubmit}>
           <label>
-            Offer amount (USD)
+            Offer amount (PHP)
             <input
               type="number"
               name="offerAmount"
-              defaultValue={listing.askingPrice - 10_000}
-              min={0}
+              defaultValue={Math.max(1, listing.askingPrice - 1)}
+              min={1}
+              max={5}
+              step={1}
               required
             />
           </label>

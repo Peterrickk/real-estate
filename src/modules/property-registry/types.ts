@@ -1,8 +1,5 @@
 import type { DevelopmentSignal, RiskLevel } from '../../lib/hazards/types';
-<<<<<<< HEAD
-=======
 import type { PropertyNFTMetadata } from '../../lib/tokens/types';
->>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
 
 /**
  * Seeded hazard/geological profile for a property. Live readings (USGS
@@ -34,13 +31,32 @@ export interface Property {
   lat: number;
   lng: number;
   hazard?: PropertyHazardProfile;
-<<<<<<< HEAD
-=======
   /** NFT metadata if property is tokenized */
   nftMetadata?: PropertyNFTMetadata;
   /** NFT capability type */
   nftCapability?: 'none' | 'mutable' | 'minting';
   /** Current NFT commitment data */
   nftCommitment?: string;
->>>>>>> d39668adf4dfda8c80381b2e7fbb009921268f31
+  /** Additional property type information */
+  propertyType?: string;
+  /** Floor area in square meters */
+  floorArea?: string;
+  /** Number of bedrooms */
+  bedrooms?: number;
+  /** Number of bathrooms */
+  bathrooms?: number;
+  /** Certificate number for NFT */
+  certificateNumber?: string;
+  /** NFT Token ID */
+  nftTokenId?: string;
+  /** CashToken Category ID */
+  cashTokenCategory?: string;
+  /** Blockchain network */
+  blockchain?: string;
+  /** Verification status */
+  verificationStatus?: string;
+  /** Previous owner wallet address */
+  previousOwner?: string;
+  /** Mint date */
+  mintDate?: string;
 }
