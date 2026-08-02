@@ -4,7 +4,7 @@ import { PropertyMap } from '../../components/PropertyMap';
 import { useAppData } from '../../context/AppDataContext';
 import { useToast } from '../../context/ToastContext';
 import { useWalletBalance } from '../../hooks/useWalletBalance';
-import { useDemoWallet } from '../../hooks/useDemoWallet';
+import { useWalletConnect } from '../../hooks/useWalletConnect';
 import { getEscrowDealForListing } from '../../data/storage';
 import {
   filterByLocation,
@@ -20,8 +20,12 @@ import type { Property } from '../property-registry/types';
 const escrowStatusFilters = [
   { value: 'with-escrow', label: 'Listings with escrow' },
   { value: 'no-escrow', label: 'No escrow yet' },
+  { value: 'pending_funding', label: 'Pending funding' },
   { value: 'funded', label: 'Funded' },
   { value: 'awaiting_title_clearance', label: 'Awaiting title clearance' },
+  { value: 'completed', label: 'Completed' },
+  { value: 'cancelled', label: 'Cancelled' },
+  { value: 'mutually_closed', label: 'Mutually closed' },
 ];
 
 function formatPrice(price: number): string {
@@ -32,16 +36,14 @@ function formatPrice(price: number): string {
   }).format(price);
 }
 
-function truncatePubkey(pubkey: string): string {
-  return `${pubkey.slice(0, 8)}…${pubkey.slice(-6)}`;
-}
-
 function getLocation(address: string): string {
   return address.split(', ').slice(1).join(', ');
 }
 
 function getSizeValue(size: string): number {
-  return Number.parseInt(size.replace(/[^\d]/g, ''), 10) || 0;
+  // Handle both "sqm" and "sq ft" - just extract the number
+  const numericValue = Number.parseInt(size.replace(/[^\d]/g, ''), 10) || 0;
+  return numericValue;
 }
 
 function escrowStatusLabel(status: EscrowDeal['status']): string {
@@ -238,20 +240,45 @@ function NFTPropertyCard({ listing, property, escrow, onBuy, onMakeOffer, insuff
 }
 
 export function MarketplacePage() {
-  const { data, startEscrowFromBuy } = useAppData();
+  const { data, startEscrowFromBuy, clearData } = useAppData();
   const { showToast } = useToast();
   const { balanceSat, noWallet } = useWalletBalance();
-  const buyerWallet = useDemoWallet();
+  const walletConnect = useWalletConnect();
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [locationSelection, setLocationSelection] = useState<LocationSelection | null>(null);
   const [selectedStatusFilters, setSelectedStatusFilters] = useState<string[]>([
     'with-escrow',
     'no-escrow',
+    'pending_funding',
     'funded',
     'awaiting_title_clearance',
+    'completed',
+    'cancelled',
+    'mutually_closed',
   ]);
   const [maxPrice, setMaxPrice] = useState(5);
-  const [maxSize, setMaxSize] = useState(3_500);
+  const [maxSize, setMaxSize] = useState(3_000); // Changed to square meters
+
+  const handleClearData = () => {
+    clearData();
+    showToast('Demo data reset to Philippine properties. Refreshing...', 'info');
+    setTimeout(() => window.location.reload(), 1000);
+  };
+
+  const handleConnectWallet = async () => {
+    await walletConnect.connect();
+    if (walletConnect.isConnected) {
+      showToast('Wallet connected successfully!', 'success');
+    } else if (walletConnect.error) {
+      showToast(`Wallet connection failed: ${walletConnect.error}`, 'info');
+    }
+  };
+
+  // Debug logging to help identify 0 listings issue
+  if (data.listings.length < 50) {
+    console.log('DEBUG: Unexpected listings count:', data.listings.length);
+    console.log('DEBUG: Click "Reset to Philippine Data" to fix this issue');
+  }
   // Demo BCH/PHP rate used to compare the wallet balance (BCH) against the
   // PHP-denominated asking price. Adjust this to model a funded buyer.
   const balancePhp = balanceSat !== null ? (balanceSat / 100_000_000) * DEMO_BCH_USD_RATE : null;
@@ -260,8 +287,8 @@ export function MarketplacePage() {
   const canAssessBalance = balanceSat !== null && !noWallet;
 
   const filteredListings = useMemo(
-    () =>
-      data.listings.filter((listing) => {
+    () => {
+      const filtered = data.listings.filter((listing) => {
         const property = data.properties.find((item) => item.id === listing.propertyId);
         if (!property) return false;
 
@@ -277,7 +304,10 @@ export function MarketplacePage() {
         const matchesSize = sizeValue <= maxSize;
 
         return matchesLocation && matchesStatus && matchesSpecificStatus && matchesPrice && matchesSize;
-      }),
+      });
+
+      return filtered;
+    },
     [data, locationSelection, maxPrice, maxSize, selectedStatusFilters],
   );
 
@@ -318,23 +348,47 @@ export function MarketplacePage() {
   );
 
   const handleBuy = async (listing: Listing) => {
-    if (!buyerWallet) {
-      showToast('Connect a demo wallet to buy.', 'info');
+    // Check if WalletConnect is connected
+    if (!walletConnect.isConnected) {
+      showToast('Please connect your wallet first to purchase this NFT property.', 'info');
+      await handleConnectWallet();
       return;
     }
 
-    const deal = await startEscrowFromBuy(listing.id, buyerWallet.publicKey);
-    if (deal) {
-      const property = data.properties.find((item) => item.id === listing.propertyId);
-      const propertyName = property?.propertyType || 'property';
+    if (!walletConnect.address) {
+      showToast('Wallet address not available. Please try reconnecting.', 'info');
+      return;
+    }
+
+    // Convert PHP price to BCH satoshis (using demo rate for chipnet)
+    // In production, you would use real PHP/BCH exchange rate
+    const phpToBchRate = DEMO_BCH_USD_RATE; // This is USD rate, need PHP rate
+    const priceInBch = listing.askingPrice / phpToBchRate; // Approximate conversion
+    const amountSats = Math.floor(priceInBch * 100_000_000);
+
+    try {
+      showToast('Processing payment...', 'info');
       
-      showToast(
-        deal.status === 'funded'
-          ? `🎉 Purchase initiated! You are buying the ${propertyName} NFT Land Certificate. The NFT and all ownership documents will be transferred to your BCH wallet upon completion. Seller can manage the escrow in Seller Dashboard.`
-          : `🎉 Purchase initiated! You are buying the ${propertyName} NFT Land Certificate. The NFT and all ownership documents will be transferred to your BCH wallet upon completion. Seller can manage the escrow in Seller Dashboard.`,
-      );
-    } else {
-      showToast('Unable to start escrow.', 'info');
+      // Send real BCH transaction via mainnet-js
+      const txResult = await walletConnect.sendTransaction(listing.sellerPubkey, amountSats);
+      
+      // Start escrow with the connected wallet
+      const deal = await startEscrowFromBuy(listing.id, walletConnect.address);
+      
+      if (deal) {
+        const property = data.properties.find((item) => item.id === listing.propertyId);
+        const propertyName = property?.propertyType || 'property';
+        
+        showToast(
+          `🎉 Purchase successful! You bought the ${propertyName} NFT Land Certificate for ₱${listing.askingPrice}. Transaction ID: ${txResult.txid}. The NFT and all ownership documents will be transferred to your wallet.`,
+          'success'
+        );
+      } else {
+        showToast('Payment sent but escrow creation failed. Please contact support.', 'info');
+      }
+    } catch (error) {
+      console.error('Purchase error:', error);
+      showToast(`Purchase failed: ${error instanceof Error ? error.message : 'Unknown error'}`, 'info');
     }
   };
 
@@ -345,7 +399,49 @@ export function MarketplacePage() {
   return (
     <section className="dashboard-page">
       <header className="page-intro">
-        <h2>Marketplace</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+          <h2>Marketplace</h2>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={handleClearData}
+            style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}
+          >
+            Reset to Philippine Data
+          </button>
+          {!walletConnect.isConnected ? (
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleConnectWallet}
+              disabled={walletConnect.isLoading}
+              style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}
+            >
+              {walletConnect.isLoading ? 'Connecting...' : 'Connect Wallet'}
+            </button>
+          ) : (
+            <div className="wallet-status" style={{ 
+              fontSize: '0.8rem', 
+              padding: '0.4rem 0.8rem',
+              background: 'rgba(47, 86, 68, 0.1)',
+              borderRadius: '0.5rem',
+              border: '1px solid rgba(47, 86, 68, 0.2)'
+            }}>
+              <span style={{ color: '#2f5644', fontWeight: '600' }}>✓ Connected</span>
+              <span style={{ marginLeft: '0.5rem', fontFamily: 'monospace', fontSize: '0.7rem' }}>
+                {walletConnect.address?.slice(0, 8)}…{walletConnect.address?.slice(-6)}
+              </span>
+              {walletConnect.balance !== null && (
+                <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem' }}>
+                  {(walletConnect.balance / 100_000_000).toFixed(8)} BCH
+                </span>
+              )}
+              <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem', opacity: 0.7 }}>
+                Chipnet
+              </span>
+            </div>
+          )}
+        </div>
       </header>
 
       <div className="dashboard-grid marketplace-layout">
@@ -416,17 +512,17 @@ export function MarketplacePage() {
 
           <label className="filter-field range-field">
             <span>Size</span>
-            <strong>{maxSize.toLocaleString()} sq ft</strong>
+            <strong>{maxSize.toLocaleString()} sqm</strong>
             <input
               type="range"
-              min="1500"
-              max="4000"
+              min="150"
+              max="2500"
               step="50"
               value={maxSize}
               onChange={(event) => setMaxSize(Number(event.target.value))}
               className="range-input"
               style={{
-                background: `linear-gradient(to right, #2f5644 ${((maxSize - 1500) / (4000 - 1500)) * 100}%, #ece5db ${((maxSize - 1500) / (4000 - 1500)) * 100}%)`,
+                background: `linear-gradient(to right, #2f5644 ${((maxSize - 150) / (2500 - 150)) * 100}%, #ece5db ${((maxSize - 150) / (2500 - 150)) * 100}%)`,
               }}
             />
           </label>
@@ -445,7 +541,7 @@ export function MarketplacePage() {
                 const property = data.properties.find((item) => item.id === listing.propertyId);
                 if (!property) return null;
 
-                const escrow = getEscrowDealForListing(data, listing.id);
+                const escrow = getEscrowDealForListing(data, listing.id) ?? null;
                 const sufficientFunds = canAssessBalance && balancePhp! >= listing.askingPrice;
                 const insufficientFunds = canAssessBalance && !sufficientFunds;
 

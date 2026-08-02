@@ -2,7 +2,6 @@ import type { Property } from '../modules/property-registry/types';
 import type { Listing } from '../modules/marketplace/types';
 import type { TransferRecord } from '../modules/ownership-history/types';
 import type { PriceHistoryPoint, ValuationSummary } from '../modules/land-insights/types';
-import { DEMO_SELLER_PUBKEY } from '../lib/ownerKeys';
 
 // Helper function to generate random BCH wallet addresses
 function generateWalletAddress(): string {

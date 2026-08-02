@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@mem-cash/validation": "^0.0.9",
+    "@reown/appkit": "^1.8.23",
     "cashscript": "^0.13.2",
     "leaflet": "^1.9.4",
     "mainnet-js": "^3.0.0",

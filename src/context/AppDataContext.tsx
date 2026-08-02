@@ -13,6 +13,7 @@ import {
   loadAppData,
   resetAppData,
   saveAppData,
+  getDefaultAppData,
   type AppData,
 } from '../data/storage';
 import { completeSale, createEscrowDeal, fundEscrow, mutualClose } from '../lib/escrow';
@@ -57,6 +58,7 @@ interface AppDataContextValue {
   resolveEscrow: (escrowId: string, action: 'completeSale' | 'mutualClose') => Promise<boolean>;
   resetData: () => void;
   getPropertyById: (id: string) => ReturnType<typeof getPropertyById>;
+  clearData: () => void;
 }
 
 const AppDataContext = createContext<AppDataContextValue | null>(null);
@@ -456,6 +458,11 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     setData(resetAppData());
   }, []);
 
+  const clearData = useCallback(() => {
+    localStorage.removeItem('bch-real-estate-data-v3');
+    setData(getDefaultAppData());
+  }, []);
+
   const value = useMemo<AppDataContextValue>(
     () => ({
       data,
@@ -473,6 +480,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       resolveEscrow,
       resetData,
       getPropertyById: (id: string) => getPropertyById(data, id),
+      clearData,
     }),
     [
       data,
@@ -489,6 +497,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       respondToOffer,
       resolveEscrow,
       resetData,
+      clearData,
     ],
   );
 
