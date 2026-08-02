@@ -4,7 +4,6 @@ import { PropertyMap } from '../../components/PropertyMap';
 import { WalletQRCode } from '../../components/WalletQRCode';
 import { useAppData } from '../../context/AppDataContext';
 import { useToast } from '../../context/ToastContext';
-import { useWalletBalance } from '../../hooks/useWalletBalance';
 import { useWalletConnect } from '../../hooks/useWalletConnect';
 import { getEscrowDealForListing } from '../../data/storage';
 import {
@@ -12,11 +11,15 @@ import {
   toMapProperty,
   type LocationSelection,
 } from '../../lib/mapUtils';
-import { DEMO_BCH_USD_RATE } from '../../lib/rates';
 import type { EscrowDeal } from '../../lib/escrow/types';
 import { OfferModal } from './OfferModal';
 import type { Listing } from './types';
 import type { Property } from '../property-registry/types';
+
+// PHP/BCH exchange rate based on user's actual balance
+// User reported: 0.00869879 BCH ≈ ₱111.09 PHP
+// So rate ≈ ₱12,782 per BCH
+const BCH_PHP_RATE = 12782;
 
 const escrowStatusFilters = [
   { value: 'with-escrow', label: 'Listings with escrow' },
@@ -69,13 +72,14 @@ function toggleFilterValue(values: string[], value: string): string[] {
 }
 
 // NFT-style card component
-function NFTPropertyCard({ listing, property, escrow, onBuy, onMakeOffer, insufficientFunds }: {
+function NFTPropertyCard({ listing, property, escrow, onBuy, onMakeOffer, insufficientFunds, needsWalletConnection }: {
   listing: Listing;
   property: Property;
   escrow: EscrowDeal | null;
   onBuy: (listing: Listing) => void;
   onMakeOffer: (listing: Listing) => void;
   insufficientFunds: boolean;
+  needsWalletConnection: boolean;
 }) {
   const propertyImages = [
     '/realestate1.jpg',
@@ -182,13 +186,18 @@ function NFTPropertyCard({ listing, property, escrow, onBuy, onMakeOffer, insuff
             type="button"
             className="btn btn-primary nft-btn-buy"
             onClick={() => onBuy(listing)}
-            disabled={Boolean(escrow) || insufficientFunds}
+            disabled={Boolean(escrow) || insufficientFunds || needsWalletConnection}
           >
-            Buy NFT Property
+            {needsWalletConnection ? 'Connect Wallet to Buy' : 'Buy NFT Property'}
           </button>
-          {insufficientFunds && !escrow && (
+          {insufficientFunds && !escrow && !needsWalletConnection && (
             <p className="nft-card__insufficient">
               Insufficient balance
+            </p>
+          )}
+          {needsWalletConnection && !escrow && (
+            <p className="nft-card__insufficient">
+              Connect wallet to purchase
             </p>
           )}
           <button
@@ -243,7 +252,6 @@ function NFTPropertyCard({ listing, property, escrow, onBuy, onMakeOffer, insuff
 export function MarketplacePage() {
   const { data, startEscrowFromBuy, clearData } = useAppData();
   const { showToast } = useToast();
-  const { balanceSat, noWallet } = useWalletBalance();
   const walletConnect = useWalletConnect();
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [showQRCode, setShowQRCode] = useState<boolean>(false);
@@ -261,7 +269,7 @@ export function MarketplacePage() {
   const [maxPrice, setMaxPrice] = useState(5);
   const [maxSize, setMaxSize] = useState(3_000); // Changed to square meters
 
-  // BCH test wallet address for QR code (from user)
+  // BCH test wallet address (user's funded address)
   const bchTestWalletAddress = "bchtest:qrku0dz8m597vfqezq005y07k7dpl3prryfywm3u3g";
 
   const handleClearData = () => {
@@ -286,12 +294,6 @@ export function MarketplacePage() {
   const handleCloseQRCode = () => {
     setShowQRCode(false);
   };
-  // Demo BCH/PHP rate used to compare the wallet balance (BCH) against the
-  // PHP-denominated asking price. Adjust this to model a funded buyer.
-  const balancePhp = balanceSat !== null ? (balanceSat / 100_000_000) * DEMO_BCH_USD_RATE : null;
-  // Only gate the Buy button on balance when we actually know the balance
-  // (not while loading, on error, or when no wallet is connected).
-  const canAssessBalance = balanceSat !== null && !noWallet;
 
   const filteredListings = useMemo(
     () => {
@@ -367,11 +369,9 @@ export function MarketplacePage() {
       return;
     }
 
-    // Convert PHP price to BCH satoshis (using demo rate for chipnet)
-    // In production, you would use real PHP/BCH exchange rate
-    const phpToBchRate = DEMO_BCH_USD_RATE; // This is USD rate, need PHP rate
-    const priceInBch = listing.askingPrice / phpToBchRate; // Approximate conversion
-    const amountSats = Math.floor(priceInBch * 100_000_000);
+  // Convert PHP price to BCH satoshis (using correct PHP/BCH rate)
+  const priceInBch = listing.askingPrice / BCH_PHP_RATE;
+  const amountSats = Math.floor(priceInBch * 100_000_000);
 
     try {
       showToast('Processing payment...', 'info');
@@ -449,9 +449,14 @@ export function MarketplacePage() {
                 {walletConnect.address?.slice(0, 8)}…{walletConnect.address?.slice(-6)}
               </span>
               {walletConnect.balance !== null && (
-                <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem' }}>
-                  {(walletConnect.balance / 100_000_000).toFixed(8)} BCH
-                </span>
+                <>
+                  <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem' }}>
+                    {(walletConnect.balance / 100_000_000).toFixed(8)} BCH
+                  </span>
+                  <span style={{ marginLeft: '0.25rem', fontSize: '0.7rem', opacity: 0.8 }}>
+                    (≈₱{((walletConnect.balance / 100_000_000) * BCH_PHP_RATE).toFixed(2)})
+                  </span>
+                </>
               )}
               <span style={{ marginLeft: '0.5rem', fontSize: '0.7rem', opacity: 0.7 }}>
                 Chipnet
@@ -559,8 +564,32 @@ export function MarketplacePage() {
                 if (!property) return null;
 
                 const escrow = getEscrowDealForListing(data, listing.id) ?? null;
-                const sufficientFunds = canAssessBalance && balancePhp! >= listing.askingPrice;
-                const insufficientFunds = canAssessBalance && !sufficientFunds;
+                
+                // Balance checking using walletConnect balance instead of demo wallet
+                let insufficientFunds = false;
+                let needsWalletConnection = false;
+                
+                if (walletConnect.isConnected && walletConnect.balance !== null) {
+                  // Convert BCH balance to PHP for comparison using correct rate
+                  const balanceBch = walletConnect.balance / 100_000_000;
+                  const balancePhp = balanceBch * BCH_PHP_RATE; // Convert BCH to PHP
+                  insufficientFunds = balancePhp < listing.askingPrice;
+                  
+                  // Debug logging for first listing
+                  if (listing.id === data.listings[0]?.id) {
+                    console.log('Balance Debug:', {
+                      balanceSats: walletConnect.balance,
+                      balanceBch,
+                      balancePhp,
+                      listingPrice: listing.askingPrice,
+                      insufficientFunds,
+                      rate: BCH_PHP_RATE
+                    });
+                  }
+                } else if (!walletConnect.isConnected) {
+                  // If wallet not connected, encourage connection
+                  needsWalletConnection = true;
+                }
 
                 return (
                   <NFTPropertyCard
@@ -571,6 +600,7 @@ export function MarketplacePage() {
                     onBuy={handleBuy}
                     onMakeOffer={handleMakeOffer}
                     insufficientFunds={insufficientFunds}
+                    needsWalletConnection={needsWalletConnection}
                   />
                 );
               })
@@ -656,7 +686,7 @@ export function MarketplacePage() {
               </button>
             </div>
             
-            <WalletQRCode address={bchTestWalletAddress} size={220} />
+            <WalletQRCode address={walletConnect.isConnected && walletConnect.address ? walletConnect.address : bchTestWalletAddress} size={220} />
             
             <div style={{ 
               marginTop: '1.5rem', 
