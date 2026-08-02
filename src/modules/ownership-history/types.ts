@@ -6,6 +6,6 @@ export interface TransferRecord {
   dateSold: string | null;
   priceAtTime: number;
   /** How this record was created — escrow completions auto-feed here. */
-  source?: 'registry' | 'escrow';
+  source?: 'registry' | 'escrow' | 'purchase';
   escrowTxId?: string;
 }
