@@ -8,7 +8,7 @@ export function RegistryNavbar() {
   return (
     <nav className="site-nav registry-nav" aria-label="Primary">
       <NavLink to="/registry/PropertyRegistryPage" className="site-nav__brand">
-        BCH Real Estate
+        <img src="/susi-logo.png" alt="SUSI" className="site-nav__logo" />
       </NavLink>
       {!onLoginPage ? (
         <button

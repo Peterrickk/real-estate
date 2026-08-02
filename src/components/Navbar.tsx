@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { useAppData } from '../context/AppDataContext';
 import { useToast } from '../context/ToastContext';
+import susiLogo from '../assets/susi-logo.png';
 
 const navItems = [
   { to: '/registry', label: 'Property Registry' },
@@ -21,7 +22,7 @@ export function Navbar() {
   return (
     <nav className="site-nav" aria-label="Primary">
       <NavLink to="/registry" className="site-nav__brand">
-        BCH Real Estate
+        <img src={susiLogo} alt="SUSI — Where property meets Bitcoin" className="site-nav__logo" />
       </NavLink>
       <ul className="site-nav__links">
         {navItems.map(({ to, label }) => (
