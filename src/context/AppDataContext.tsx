@@ -9,6 +9,7 @@ import {
 } from 'react';
 import {
   DEMO_SELLER_PUBKEY,
+  DEMO_BUYER_PUBKEY,
   getPropertyById,
   loadAppData,
   resetAppData,
@@ -16,6 +17,7 @@ import {
   getDefaultAppData,
   type AppData,
 } from '../data/storage';
+import { findDemoWalletByPublicKey } from '../lib/ownerKeys';
 import { completeSale, createEscrowDeal, fundEscrow, mutualClose } from '../lib/escrow';
 import type { EscrowDeal } from '../lib/escrow/types';
 import { DEMO_BCH_USD_RATE, FUNDING_METHODS } from '../lib/rates';
@@ -47,8 +49,11 @@ interface AppDataContextValue {
   addOffer: (input: SubmitOfferInput) => Offer;
   addDeposit: (input: AddDepositInput) => FiatDeposit;
   startEscrowFromBuy: (listingId: string, buyerPubkey: string) => Promise<EscrowDeal | null>;
+  transferPropertyOwnership: (propertyId: string, buyerPubkey: string) => boolean;
   getSellerProperties: () => import('../modules/property-registry/types').Property[];
+  getUserProperties: () => import('../modules/property-registry/types').Property[];
   getSellerListings: () => Listing[];
+  getUserListings: () => Listing[];
   getSellerOffers: () => Offer[];
   getSellerEscrows: () => EscrowDeal[];
   createListing: (propertyId: string, askingPrice: number) => boolean;
@@ -229,7 +234,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const startEscrowFromBuy = useCallback(
-    async (listingId: string, buyerPubkey: string): Promise<EscrowDeal | null> => {
+    async (listingId: string, buyerInput: string): Promise<EscrowDeal | null> => {
       const current = data;
       const listing = current.listings.find((item) => item.id === listingId);
       if (!listing) return null;
@@ -238,6 +243,26 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         (deal) => deal.listingId === listingId && ACTIVE_ESCROW_STATUSES.includes(deal.status),
       );
       if (existing) return existing;
+
+      // Convert buyer address to public key if needed
+      let buyerPubkey = buyerInput;
+      const buyerWallet = findDemoWalletByPublicKey(buyerInput);
+      if (buyerWallet) {
+        buyerPubkey = buyerWallet.publicKey;
+      } else {
+        // Try to find wallet by address
+        for (const wallet of Object.values({
+          'avery@example.com': { address: 'bchtest:qrku0dz8m597vfqezq005y07k7dpl3prryfywm3u3g', publicKey: '02ecf3b3ce386950c4d0026c036b84356969afdee269b9433c102180372b0bfe68' },
+          'buyer@example.com': { address: 'bchtest:qpuuwnw6msvvc2u4gm56vzpq5lwrmv8luy2ez6zj80', publicKey: '03b103a5e1092993a3b7c2d216c1f09470e8b85f0756806e3f66ad2e92619b137c' },
+        })) {
+          if (wallet.address === buyerInput) {
+            buyerPubkey = wallet.publicKey;
+            break;
+          }
+        }
+      }
+
+      console.log('Starting escrow with buyer pubkey:', buyerPubkey);
 
       // Deploy the PropertySaleEscrow contract for this deal (address derived
       // from the artifact + the parties' pubkeys; no broadcast needed).
@@ -266,8 +291,40 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     [data.properties],
   );
 
+  const getUserProperties = useCallback(
+    () => {
+      // Use the default demo buyer pubkey (avery@example.com)
+      const userPubkey = DEMO_BUYER_PUBKEY;
+      
+      // Also include the funded wallet address mapping
+      const fundedWalletPubkey = '02ecf3b3ce386950c4d0026c036b84356969afdee269b9433c102180372b0bfe68';
+      
+      // Filter properties owned by the user
+      return data.properties.filter((property) => 
+        property.ownerPubkey === userPubkey || property.ownerPubkey === fundedWalletPubkey
+      );
+    },
+    [data.properties],
+  );
+
   const getSellerListings = useCallback(
     () => data.listings.filter((listing) => listing.sellerPubkey === DEMO_SELLER_PUBKEY),
+    [data.listings],
+  );
+
+  const getUserListings = useCallback(
+    () => {
+      // Use the default demo buyer pubkey (avery@example.com)
+      const userPubkey = DEMO_BUYER_PUBKEY;
+      
+      // Also include the funded wallet address mapping
+      const fundedWalletPubkey = '02ecf3b3ce386950c4d0026c036b84356969afdee269b9433c102180372b0bfe68';
+      
+      // Filter listings owned by the user
+      return data.listings.filter((listing) => 
+        listing.sellerPubkey === userPubkey || listing.sellerPubkey === fundedWalletPubkey
+      );
+    },
     [data.listings],
   );
 
@@ -295,10 +352,20 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       const property = current.properties.find((item) => item.id === propertyId);
       if (
         !property ||
-        property.ownerPubkey !== DEMO_SELLER_PUBKEY ||
         !property.tokenized ||
         current.listings.some((listing) => listing.propertyId === propertyId)
       ) {
+        return current;
+      }
+
+      // Allow both demo seller and demo buyer to create listings
+      const userPubkeys = [
+        DEMO_SELLER_PUBKEY,
+        DEMO_BUYER_PUBKEY,
+        '03b103a5e1092993a3b7c2d216c1f09470e8b85f0756806e3f66ad2e92619b137c', // buyer@example.com
+      ];
+
+      if (!userPubkeys.includes(property.ownerPubkey)) {
         return current;
       }
 
@@ -309,7 +376,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         address: property.address,
         size: property.size,
         askingPrice,
-        sellerPubkey: DEMO_SELLER_PUBKEY,
+        sellerPubkey: property.ownerPubkey,
         listedAt: todayIsoDate(),
       };
 
@@ -330,7 +397,16 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
 
     setData((current) => {
       const listing = current.listings.find((item) => item.id === listingId);
-      if (!listing || listing.sellerPubkey !== DEMO_SELLER_PUBKEY) return current;
+      if (!listing) return current;
+
+      // Allow both demo seller and demo buyer to update listings
+      const userPubkeys = [
+        DEMO_SELLER_PUBKEY,
+        DEMO_BUYER_PUBKEY,
+        '03b103a5e1092993a3b7c2d216c1f09470e8b85f0756806e3f66ad2e92619b137c', // buyer@example.com
+      ];
+
+      if (!userPubkeys.includes(listing.sellerPubkey)) return current;
 
       updated = true;
       return {
@@ -352,7 +428,16 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
 
     setData((current) => {
       const listing = current.listings.find((item) => item.id === listingId);
-      if (!listing || listing.sellerPubkey !== DEMO_SELLER_PUBKEY) return current;
+      if (!listing) return current;
+
+      // Allow both demo seller and demo buyer to delist properties
+      const userPubkeys = [
+        DEMO_SELLER_PUBKEY,
+        DEMO_BUYER_PUBKEY,
+        '03b103a5e1092993a3b7c2d216c1f09470e8b85f0756806e3f66ad2e92619b137c', // buyer@example.com
+      ];
+
+      if (!userPubkeys.includes(listing.sellerPubkey)) return current;
 
       removed = true;
       return {
@@ -463,14 +548,115 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     setData(getDefaultAppData());
   }, []);
 
+  const transferPropertyOwnership = useCallback((propertyId: string, buyerAddress: string): boolean => {
+    let transferred = false;
+
+    setData((current) => {
+      const property = current.properties.find((item) => item.id === propertyId);
+      if (!property) return current;
+
+      // Convert buyer address to public key if needed
+      let buyerPubkey = buyerAddress;
+      const buyerWallet = findDemoWalletByPublicKey(buyerAddress);
+      if (buyerWallet) {
+        buyerPubkey = buyerWallet.publicKey;
+      } else {
+        // Try to find wallet by address - use the funded wallet pubkey
+        const addressToPubkeyMap: Record<string, string> = {
+          'bchtest:qrku0dz8m597vfqezq005y07k7dpl3prryfywm3u3g': '02ecf3b3ce386950c4d0026c036b84356969afdee269b9433c102180372b0bfe68', // avery@example.com
+          'bchtest:qpuuwnw6msvvc2u4gm56vzpq5lwrmv8luy2ez6zj80': '03b103a5e1092993a3b7c2d216c1f09470e8b85f0756806e3f66ad2e92619b137c', // buyer@example.com
+        };
+        
+        if (addressToPubkeyMap[buyerAddress]) {
+          buyerPubkey = addressToPubkeyMap[buyerAddress];
+        }
+      }
+
+      console.log('Transferring ownership:', {
+        propertyId,
+        buyerAddress,
+        buyerPubkey,
+        previousOwner: property.ownerPubkey
+      });
+
+      transferred = true;
+      const purchaseDate = todayIsoDate();
+      const previousOwner = property.ownerPubkey;
+      const history = current.transferHistory[propertyId] ?? [];
+
+      // Update previous owner's record
+      const updatedHistory = history.map((record) =>
+        record.owner === previousOwner && record.dateSold === null
+          ? {
+              ...record,
+              dateSold: purchaseDate,
+              source: 'purchase' as const,
+            }
+          : record,
+      );
+
+      // Add new owner's record
+      const newRecord: import('../modules/ownership-history/types').TransferRecord = {
+        id: `tx-purchase-${propertyId}-${Date.now()}`,
+        propertyId: property.id,
+        owner: buyerPubkey,
+        dateAcquired: purchaseDate,
+        dateSold: null,
+        priceAtTime: property.listedPrice || 0,
+        source: 'purchase',
+      };
+
+      updatedHistory.unshift(newRecord);
+
+      // Update price history
+      const newPricePoint: import('../modules/land-insights/types').PriceHistoryPoint = {
+        date: purchaseDate,
+        price: property.listedPrice || 0,
+        source: 'purchase',
+        propertyId: property.id,
+      };
+
+      const updatedPriceHistory = [
+        ...(current.priceHistory[propertyId] ?? []),
+        newPricePoint,
+      ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+      // Remove listing since property is sold
+      const updatedListings = current.listings.filter((item) => item.propertyId !== propertyId);
+
+      return {
+        ...current,
+        properties: current.properties.map((item) =>
+          item.id === propertyId
+            ? { ...item, ownerPubkey: buyerPubkey, listedPrice: null }
+            : item,
+        ),
+        listings: updatedListings,
+        transferHistory: {
+          ...current.transferHistory,
+          [propertyId]: updatedHistory,
+        },
+        priceHistory: {
+          ...current.priceHistory,
+          [propertyId]: updatedPriceHistory,
+        },
+      };
+    });
+
+    return transferred;
+  }, []);
+
   const value = useMemo<AppDataContextValue>(
     () => ({
       data,
       addOffer,
       addDeposit,
       startEscrowFromBuy,
+      transferPropertyOwnership,
       getSellerProperties,
+      getUserProperties,
       getSellerListings,
+      getUserListings,
       getSellerOffers,
       getSellerEscrows,
       createListing,
@@ -487,8 +673,11 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       addOffer,
       addDeposit,
       startEscrowFromBuy,
+      transferPropertyOwnership,
       getSellerProperties,
+      getUserProperties,
       getSellerListings,
+      getUserListings,
       getSellerOffers,
       getSellerEscrows,
       createListing,

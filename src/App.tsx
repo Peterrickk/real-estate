@@ -7,7 +7,7 @@ import { LoginPage } from './modules/login/login';
 import { MarketplacePage } from './modules/marketplace/MarketplacePage';
 import { OwnershipHistoryPage } from './modules/ownership-history/OwnershipHistoryPage';
 import { LandInsightsPage } from './modules/land-insights/LandInsightsPage';
-import { SellerDashboardPage } from './modules/seller/SellerDashboardPage';
+import { UserDashboardPage } from './modules/user/UserDashboardPage';
 import { SettingsPage } from './modules/auth/SettingsPage';
 
 export function App() {
@@ -34,7 +34,7 @@ export function App() {
         }
       >
         <Route path="/marketplace" element={<MarketplacePage />} />
-        <Route path="/seller" element={<SellerDashboardPage />} />
+        <Route path="/dashboard" element={<UserDashboardPage />} />
         <Route path="/history" element={<OwnershipHistoryPage />} />
         <Route path="/insights" element={<LandInsightsPage />} />
         <Route path="/settings" element={<SettingsPage />} />

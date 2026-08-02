@@ -92,6 +92,10 @@ function NFTPropertyCard({ listing, property, escrow, onBuy, onMakeOffer, insuff
   const imageIndex = Math.abs(property.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0)) % propertyImages.length;
   const imageUrl = propertyImages[imageIndex];
 
+  // Check if property is already owned by the user
+  const userPubkey = '02ecf3b3ce386950c4d0026c036b84356969afdee269b9433c102180372b0bfe68';
+  const isAlreadyOwned = property.ownerPubkey === userPubkey;
+
   return (
     <article className="nft-property-card">
       <div className="nft-card__media">
@@ -184,26 +188,32 @@ function NFTPropertyCard({ listing, property, escrow, onBuy, onMakeOffer, insuff
         <div className="nft-card__actions">
           <button
             type="button"
-            className="btn btn-primary nft-btn-buy"
+            className={`btn ${isAlreadyOwned ? 'btn-disabled' : 'btn-primary'} nft-btn-buy`}
             onClick={() => onBuy(listing)}
-            disabled={Boolean(escrow) || insufficientFunds || needsWalletConnection}
+            disabled={Boolean(escrow) || insufficientFunds || needsWalletConnection || isAlreadyOwned}
           >
-            {needsWalletConnection ? 'Connect Wallet to Buy' : 'Buy NFT Property'}
+            {isAlreadyOwned ? 'Already Owned' : needsWalletConnection ? 'Connect Wallet to Buy' : 'Buy NFT Property'}
           </button>
-          {insufficientFunds && !escrow && !needsWalletConnection && (
+          {insufficientFunds && !escrow && !needsWalletConnection && !isAlreadyOwned && (
             <p className="nft-card__insufficient">
               Insufficient balance
             </p>
           )}
-          {needsWalletConnection && !escrow && (
+          {needsWalletConnection && !escrow && !isAlreadyOwned && (
             <p className="nft-card__insufficient">
               Connect wallet to purchase
+            </p>
+          )}
+          {isAlreadyOwned && (
+            <p className="nft-card__insufficient">
+              This property is already in your collection
             </p>
           )}
           <button
             type="button"
             className="btn btn-secondary nft-btn-offer"
             onClick={() => onMakeOffer(listing)}
+            disabled={isAlreadyOwned}
           >
             Make Offer
           </button>
@@ -250,7 +260,7 @@ function NFTPropertyCard({ listing, property, escrow, onBuy, onMakeOffer, insuff
 }
 
 export function MarketplacePage() {
-  const { data, startEscrowFromBuy, clearData } = useAppData();
+  const { data, startEscrowFromBuy, transferPropertyOwnership, clearData } = useAppData();
   const { showToast } = useToast();
   const walletConnect = useWalletConnect();
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
@@ -274,6 +284,8 @@ export function MarketplacePage() {
 
   const handleClearData = () => {
     clearData();
+    // Also clear localStorage to reset everything
+    localStorage.removeItem('bch-real-estate-data-v3');
     showToast('Demo data reset to Philippine properties. Refreshing...', 'info');
     setTimeout(() => window.location.reload(), 1000);
   };
@@ -383,13 +395,31 @@ export function MarketplacePage() {
       const deal = await startEscrowFromBuy(listing.id, walletConnect.address);
       
       if (deal) {
+        // Transfer property ownership to buyer
+        console.log('Transferring property ownership:', {
+          propertyId: listing.propertyId,
+          buyerAddress: walletConnect.address,
+          listingId: listing.id
+        });
+        
+        const transferred = transferPropertyOwnership(listing.propertyId, walletConnect.address);
+        
+        console.log('Transfer result:', transferred);
+        
         const property = data.properties.find((item) => item.id === listing.propertyId);
         const propertyName = property?.propertyType || 'property';
         
-        showToast(
-          `🎉 Purchase successful! You bought the ${propertyName} NFT Land Certificate for ₱${listing.askingPrice}. Transaction ID: ${txResult.txid}. The NFT and all ownership documents will be transferred to your wallet.`,
-          'success'
-        );
+        if (transferred) {
+          showToast(
+            `🎉 Purchase successful! You bought the ${propertyName} NFT Land Certificate for ₱${listing.askingPrice}. Transaction ID: ${txResult.txid}. The NFT and all ownership documents have been transferred to your wallet.`,
+            'success'
+          );
+        } else {
+          showToast(
+            `🎉 Purchase successful! You bought the ${propertyName} NFT Land Certificate for ₱${listing.askingPrice}. Transaction ID: ${txResult.txid}. The NFT and all ownership documents will be transferred to your wallet.`,
+            'success'
+          );
+        }
       } else {
         showToast('Payment sent but escrow creation failed. Please contact support.', 'info');
       }

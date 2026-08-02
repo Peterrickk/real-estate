@@ -6,7 +6,7 @@ import { FundAccountModal } from '../modules/funding/FundAccountModal';
 
 const navItems = [
   { to: '/marketplace', label: 'Marketplace', icon: MarketIcon },
-  { to: '/seller', label: 'Seller Dashboard', icon: SellerIcon },
+  { to: '/dashboard', label: 'My Dashboard', icon: SellerIcon },
 ];
 
 function MarketIcon() {
@@ -22,9 +22,10 @@ function MarketIcon() {
 function SellerIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M5 18.5h14" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-      <path d="M7.5 8.5 12 5l4.5 3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M8.5 18.5v-7H15v7" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+      <rect x="3" y="3" width="7" height="7" fill="none" stroke="currentColor" strokeWidth="1.7" />
+      <rect x="14" y="3" width="7" height="7" fill="none" stroke="currentColor" strokeWidth="1.7" />
+      <rect x="14" y="14" width="7" height="7" fill="none" stroke="currentColor" strokeWidth="1.7" />
+      <rect x="3" y="14" width="7" height="7" fill="none" stroke="currentColor" strokeWidth="1.7" />
     </svg>
   );
 }

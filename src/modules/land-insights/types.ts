@@ -2,7 +2,7 @@ export interface PriceHistoryPoint {
   date: string;
   price: number;
   /** Escrow-completed sales auto-append a data point here. */
-  source?: 'appraisal' | 'escrow';
+  source?: 'appraisal' | 'escrow' | 'purchase';
   escrowTxId?: string;
   propertyId?: string;
 }
