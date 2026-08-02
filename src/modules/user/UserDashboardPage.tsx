@@ -44,14 +44,6 @@ export function UserDashboardPage() {
   const userProperties = getUserProperties();
   const userListings = getUserListings();
 
-  // Debug logging
-  console.log('User Dashboard Debug:', {
-    userPropertiesCount: userProperties.length,
-    userListingsCount: userListings.length,
-    userProperties: userProperties.map(p => ({ id: p.id, address: p.address, ownerPubkey: p.ownerPubkey })),
-    userListings: userListings.map(l => ({ id: l.id, propertyId: l.propertyId, sellerPubkey: l.sellerPubkey }))
-  });
-
   const unlistedProperties = useMemo(
     () =>
       userProperties.filter(

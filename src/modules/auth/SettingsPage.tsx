@@ -3,7 +3,7 @@ import { useAuth, type HomeRoute } from '../../context/AuthContext';
 
 const homeOptions: Array<{ value: HomeRoute; label: string }> = [
   { value: '/marketplace', label: 'Marketplace' },
-  { value: '/seller', label: 'Seller Workspace' },
+  { value: '/dashboard', label: 'My Dashboard' },
   { value: '/history', label: 'Ownership History' },
   { value: '/insights', label: 'Land Insights' },
 ];

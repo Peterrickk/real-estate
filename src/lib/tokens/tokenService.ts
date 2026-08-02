@@ -109,8 +109,6 @@ export class PropertyTokenService {
         },
       });
 
-      console.log('NFT minted successfully:', tokenGenesis);
-      
       return {
         tokenId: 'unknown', // Will be available in the actual response
         txid: tokenGenesis.txId || 'unknown',
@@ -145,8 +143,9 @@ export class PropertyTokenService {
 
       // Note: Actual send implementation depends on mainnet-js API version
       // This is a placeholder for the actual implementation
-      console.log('Transferring NFT to:', newOwnerAddress);
-      console.log('NFT commitment:', nftUtxo.token!.nft!.commitment);
+      
+      // Prevent unused variable warnings
+      void newOwnerAddress;
       
       return 'demo-txid';
     } catch (error) {
@@ -205,12 +204,8 @@ export class PropertyTokenService {
       const currentMetadata = JSON.parse(nftUtxo.token!.nft!.commitment || '{}');
       currentMetadata.s = newStatus.charAt(0);
 
-      // Update commitment
-      const newCommitment = JSON.stringify(currentMetadata);
-
       // Note: Actual send implementation depends on mainnet-js API version
-      console.log('Updating NFT status to:', newStatus);
-      console.log('New commitment:', newCommitment);
+      // In production, this would update the NFT commitment
       
       return 'demo-txid';
     } catch (error) {

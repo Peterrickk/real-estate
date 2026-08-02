@@ -78,13 +78,6 @@ export function recordCompletedSale(deal: EscrowDeal): CompletedSaleEvent | null
   transferRecords.push(...saleEventToTransferRecords(event));
   priceHistoryPoints.push(saleEventToPriceHistoryPoint(event));
 
-  console.log('TODO: persist sale event', {
-    action: 'recordCompletedSale',
-    event,
-    feeds: ['ownership-history', 'land-insights'],
-    note: 'Property token transfer is a separate registry step',
-  });
-
   return event;
 }
 

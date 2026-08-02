@@ -262,8 +262,6 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      console.log('Starting escrow with buyer pubkey:', buyerPubkey);
-
       // Deploy the PropertySaleEscrow contract for this deal (address derived
       // from the artifact + the parties' pubkeys; no broadcast needed).
       const deal = await createEscrowDeal(listing, buyerPubkey);
@@ -571,13 +569,6 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
           buyerPubkey = addressToPubkeyMap[buyerAddress];
         }
       }
-
-      console.log('Transferring ownership:', {
-        propertyId,
-        buyerAddress,
-        buyerPubkey,
-        previousOwner: property.ownerPubkey
-      });
 
       transferred = true;
       const purchaseDate = todayIsoDate();

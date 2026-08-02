@@ -396,15 +396,7 @@ export function MarketplacePage() {
       
       if (deal) {
         // Transfer property ownership to buyer
-        console.log('Transferring property ownership:', {
-          propertyId: listing.propertyId,
-          buyerAddress: walletConnect.address,
-          listingId: listing.id
-        });
-        
         const transferred = transferPropertyOwnership(listing.propertyId, walletConnect.address);
-        
-        console.log('Transfer result:', transferred);
         
         const property = data.properties.find((item) => item.id === listing.propertyId);
         const propertyName = property?.propertyType || 'property';
@@ -604,18 +596,6 @@ export function MarketplacePage() {
                   const balanceBch = walletConnect.balance / 100_000_000;
                   const balancePhp = balanceBch * BCH_PHP_RATE; // Convert BCH to PHP
                   insufficientFunds = balancePhp < listing.askingPrice;
-                  
-                  // Debug logging for first listing
-                  if (listing.id === data.listings[0]?.id) {
-                    console.log('Balance Debug:', {
-                      balanceSats: walletConnect.balance,
-                      balanceBch,
-                      balancePhp,
-                      listingPrice: listing.askingPrice,
-                      insufficientFunds,
-                      rate: BCH_PHP_RATE
-                    });
-                  }
                 } else if (!walletConnect.isConnected) {
                   // If wallet not connected, encourage connection
                   needsWalletConnection = true;

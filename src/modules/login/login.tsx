@@ -5,7 +5,7 @@ import { useAuth, type HomeRoute } from '../../context/AuthContext';
 type AuthMode = 'login' | 'signup';
 
 function resolvePreferredHome(from: string): HomeRoute {
-  if (from.startsWith('/seller')) return '/seller';
+  if (from.startsWith('/dashboard')) return '/dashboard';
   if (from.startsWith('/history')) return '/history';
   if (from.startsWith('/insights')) return '/insights';
   return '/marketplace';

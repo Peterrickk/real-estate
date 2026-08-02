@@ -9,7 +9,7 @@ import {
 } from 'react';
 import { registerAccount, seedDemoAccounts, updateStoredAccount, verifyAccount } from '../lib/authStore';
 
-export type HomeRoute = '/marketplace' | '/seller' | '/history' | '/insights';
+export type HomeRoute = '/marketplace' | '/dashboard' | '/history' | '/insights';
 
 export interface AuthUser {
   displayName: string;
@@ -48,7 +48,7 @@ const STORAGE_KEY = 'bch-real-estate-auth-v1';
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const homeRoutes: HomeRoute[] = ['/marketplace', '/seller', '/history', '/insights'];
+const homeRoutes: HomeRoute[] = ['/marketplace', '/dashboard', '/history', '/insights'];
 
 function normalizeHome(home?: HomeRoute): HomeRoute {
   return home && homeRoutes.includes(home) ? home : '/marketplace';

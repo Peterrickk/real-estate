@@ -93,14 +93,9 @@ export function useWalletConnect() {
       
       const demoTxid = `chipnet-tx-${Date.now()}`;
       
-      console.log('BCH transaction simulated on chipnet:', { 
-        demoTxid,
-        to: toAddress, 
-        amount: amountSats, 
-        from: walletState.address,
-        network,
-        note: 'For real transactions, integrate with mainnet-js send API or use existing escrow infrastructure'
-      });
+      // Prevent unused variable warnings
+      void toAddress;
+      void amountSats;
       
       return {
         txid: demoTxid,
