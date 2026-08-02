@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PropertyMap } from '../../components/PropertyMap';
+import { WalletQRCode } from '../../components/WalletQRCode';
 import { useAppData } from '../../context/AppDataContext';
 import { useToast } from '../../context/ToastContext';
 import { useWalletBalance } from '../../hooks/useWalletBalance';
@@ -245,6 +246,7 @@ export function MarketplacePage() {
   const { balanceSat, noWallet } = useWalletBalance();
   const walletConnect = useWalletConnect();
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
+  const [showQRCode, setShowQRCode] = useState<boolean>(false);
   const [locationSelection, setLocationSelection] = useState<LocationSelection | null>(null);
   const [selectedStatusFilters, setSelectedStatusFilters] = useState<string[]>([
     'with-escrow',
@@ -258,6 +260,9 @@ export function MarketplacePage() {
   ]);
   const [maxPrice, setMaxPrice] = useState(5);
   const [maxSize, setMaxSize] = useState(3_000); // Changed to square meters
+
+  // BCH test wallet address for QR code (from user)
+  const bchTestWalletAddress = "bchtest:qrku0dz8m597vfqezq005y07k7dpl3prryfywm3u3g";
 
   const handleClearData = () => {
     clearData();
@@ -274,11 +279,13 @@ export function MarketplacePage() {
     }
   };
 
-  // Debug logging to help identify 0 listings issue
-  if (data.listings.length < 50) {
-    console.log('DEBUG: Unexpected listings count:', data.listings.length);
-    console.log('DEBUG: Click "Reset to Philippine Data" to fix this issue');
-  }
+  const handleShowQRCode = () => {
+    setShowQRCode(true);
+  };
+
+  const handleCloseQRCode = () => {
+    setShowQRCode(false);
+  };
   // Demo BCH/PHP rate used to compare the wallet balance (BCH) against the
   // PHP-denominated asking price. Adjust this to model a funded buyer.
   const balancePhp = balanceSat !== null ? (balanceSat / 100_000_000) * DEMO_BCH_USD_RATE : null;
@@ -410,15 +417,25 @@ export function MarketplacePage() {
             Reset to Philippine Data
           </button>
           {!walletConnect.isConnected ? (
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={handleConnectWallet}
-              disabled={walletConnect.isLoading}
-              style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}
-            >
-              {walletConnect.isLoading ? 'Connecting...' : 'Connect Wallet'}
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={handleConnectWallet}
+                disabled={walletConnect.isLoading}
+                style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}
+              >
+                {walletConnect.isLoading ? 'Connecting...' : 'Connect Wallet'}
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={handleShowQRCode}
+                style={{ fontSize: '0.8rem', padding: '0.4rem 0.8rem' }}
+              >
+                Show QR Code
+              </button>
+            </div>
           ) : (
             <div className="wallet-status" style={{ 
               fontSize: '0.8rem', 
@@ -593,6 +610,99 @@ export function MarketplacePage() {
       )}
 
       {selectedListing && <OfferModal listing={selectedListing} onClose={() => setSelectedListing(null)} />}
+
+      {showQRCode && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.7)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 10000
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '1rem',
+            padding: '2rem',
+            maxWidth: '500px',
+            width: '90%',
+            maxHeight: '90vh',
+            overflowY: 'auto'
+          }}>
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              marginBottom: '1.5rem' 
+            }}>
+              <h2 style={{ margin: 0, color: '#2f5644' }}>
+                Send BCH to This Wallet
+              </h2>
+              <button
+                onClick={handleCloseQRCode}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '1.5rem',
+                  cursor: 'pointer',
+                  color: '#2f5644'
+                }}
+              >
+                ×
+              </button>
+            </div>
+            
+            <WalletQRCode address={bchTestWalletAddress} size={220} />
+            
+            <div style={{ 
+              marginTop: '1.5rem', 
+              textAlign: 'center',
+              fontSize: '0.85rem',
+              color: '#2f5644',
+              lineHeight: '1.5'
+            }}>
+              <p style={{ margin: '0 0 0.5rem 0' }}>
+                <strong>Instructions:</strong>
+              </p>
+              <ol style={{ 
+                margin: 0, 
+                paddingLeft: '1.5rem',
+                textAlign: 'left'
+              }}>
+                <li>Scan this QR code with your BCH wallet app</li>
+                <li>Send BCH to this address on chipnet for testing</li>
+                <li>After funding, connect your wallet to buy NFTs</li>
+                <li>Use the "Connect Wallet" button to send transactions</li>
+              </ol>
+              <p style={{ 
+                margin: '1rem 0 0 0', 
+                fontSize: '0.8rem',
+                color: '#2f5644',
+                opacity: 0.8,
+                fontStyle: 'italic'
+              }}>
+                This is a testnet address for chipnet only. No real BCH value.
+              </p>
+            </div>
+            
+            <button
+              onClick={handleCloseQRCode}
+              className="btn btn-primary"
+              style={{
+                width: '100%',
+                marginTop: '1.5rem',
+                padding: '0.75rem'
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

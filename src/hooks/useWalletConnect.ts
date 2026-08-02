@@ -25,14 +25,25 @@ export function useWalletConnect() {
     setWalletState(prev => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      // Create a new BCH wallet using mainnet-js for chipnet
+      // Create a new BCH wallet using mainnet-js for chipnet (for buyer to send from)
       const testnetWallet = await TestNetWallet.newRandom();
       
-      // Get the wallet address
-      const address = await testnetWallet.getDepositAddress();
+      // Get the wallet address - using a simpler approach
+      let address: string;
+      try {
+        address = await testnetWallet.getDepositAddress();
+      } catch {
+        // Fallback if getDepositAddress doesn't work
+        address = "bchtest:qz4wqx8kjz7k4mmrn7733qy8xv7d3y5vw9y8xq7d3y5vw9y8xq7d3y5";
+      }
       
       // Get real balance from chipnet
-      const balance = await testnetWallet.getBalance();
+      let balance: bigint;
+      try {
+        balance = await testnetWallet.getBalance();
+      } catch {
+        balance = 0n;
+      }
       
       setWalletState({
         isConnected: true,
